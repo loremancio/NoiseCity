@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import it.dii.unipi.myapplication.controller.LoginActivity
 import it.dii.unipi.myapplication.controller.SoundActivity
 import it.dii.unipi.myapplication.ui.theme.MyApplicationTheme
 
@@ -30,6 +31,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate: Starting MainActivity")
+        
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish()
         
         setContent {
             MyApplicationTheme {

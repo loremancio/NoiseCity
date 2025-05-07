@@ -1,5 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MyApplication" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MyApplication" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Colore “brand” principale -->
+        <item name="colorPrimary">@color/primary_blue</item>
+        <!-- Variante scura, usata di default per la status‑bar -->
+        <item name="colorPrimaryVariant">@color/primary_blue_dark</item>
+        <!-- Colore del testo/icona su primary -->
+        <item name="colorOnPrimary">@color/on_primary_blue</item>
+
+        <!-- Questo fa sì che la status‑bar prenda davvero colorPrimaryVariant -->
+        <item name="android:statusBarColor">@color/primary_blue_dark</item>  <!-- :contentReference[oaicite:0]{index=0} -->
+
+        <!-- Se vuoi anche la navigation‑bar abbinata -->
+        <item name="android:navigationBarColor">@color/primary_blue_dark</item>
+
+        <!-- Bottoni Material: usano colorPrimary di default, ma puoi personalizzarli -->
+        <item name="materialButtonStyle">@style/Widget.MyApp.MaterialButton</item>
+    </style>
+
+    <style name="Widget.MyApp.MaterialButton"
+        parent="Widget.MaterialComponents.Button">
+        <!-- sfondo -->
+        <item name="android:backgroundTint">@color/primary_blue</item>
+        <!-- testo -->
+        <item name="android:textColor">@color/on_primary_blue</item>
+    </style>
 </resources>
