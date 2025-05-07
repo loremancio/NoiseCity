@@ -5,7 +5,6 @@ import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import it.dii.unipi.myapplication.model.AuthRepository
 import it.dii.unipi.myapplication.model.RegistrationResult
@@ -13,6 +12,7 @@ import it.dii.unipi.myapplication.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.appcompat.app.AlertDialog
 
 class RegistrationActivity : AppCompatActivity() {
 
@@ -40,7 +40,10 @@ class RegistrationActivity : AppCompatActivity() {
             if (username.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword) {
                 performRegistration(username, password)
             } else {
-                Toast.makeText(this, "Error in the fields", Toast.LENGTH_SHORT).show()
+                AlertDialog.Builder(this@RegistrationActivity)
+                    .setTitle("Error in the fields")
+                    .setMessage("Fields empty or password mismatch")
+                    .show()
             }
         }
         backButton.setOnClickListener {
@@ -64,12 +67,18 @@ class RegistrationActivity : AppCompatActivity() {
             runOnUiThread {
                 when (result) {
                     is RegistrationResult.Success -> {
-                        Toast.makeText(this@RegistrationActivity, result.message, Toast.LENGTH_SHORT).show()
+                        AlertDialog.Builder(this@RegistrationActivity)
+                            .setTitle("Login Success!")
+                            .setMessage(result.message)
+                            .show()
                         // the finish command goes back to the previous activity
                         finish()
                     }
                     is RegistrationResult.Error -> {
-                        Toast.makeText(this@RegistrationActivity, result.message, Toast.LENGTH_SHORT).show()
+                        AlertDialog.Builder(this@RegistrationActivity)
+                            .setTitle("Login Error")
+                            .setMessage(result.message)
+                            .show()
                     }
                 }
             }

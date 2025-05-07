@@ -2,17 +2,14 @@ package it.dii.unipi.myapplication.controller
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentTransaction
 import it.dii.unipi.myapplication.R
-import it.dii.unipi.myapplication.controller.SoundActivity
 import it.dii.unipi.myapplication.model.AuthRepository
 import it.dii.unipi.myapplication.model.LoginResult
 import kotlinx.coroutines.CoroutineScope
@@ -43,7 +40,10 @@ class LoginActivity : AppCompatActivity() {
             if (username.isNotEmpty() && password.isNotEmpty()) {
                 performLogin(username, password)
             } else {
-                Toast.makeText(this, "Please, insert username and password", Toast.LENGTH_SHORT).show()
+                AlertDialog.Builder(this@LoginActivity)
+                    .setTitle("Login Error")
+                    .setMessage("Please, insert username and password")
+                    .show()
             }
         }
 
@@ -69,13 +69,18 @@ class LoginActivity : AppCompatActivity() {
             runOnUiThread {
                 when (result) {
                     is LoginResult.Success -> {
-                        Toast.makeText(this@LoginActivity, "Login done", Toast.LENGTH_SHORT).show()
+                        AlertDialog.Builder(this@LoginActivity)
+                            .setTitle("Login Success!")
+                            .show()
                         val intent = Intent(this@LoginActivity, SoundActivity::class.java)
                         startActivity(intent)
                         finish()
                     }
                     is LoginResult.Error -> {
-                        Toast.makeText(this@LoginActivity, result.message, Toast.LENGTH_SHORT).show()
+                        AlertDialog.Builder(this@LoginActivity)
+                            .setTitle("Login Error")
+                            .setMessage(result.message)
+                            .show()
                     }
                 }
             }
