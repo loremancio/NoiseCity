@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <it.dii.unipi.myapplication.view.WaveformView
+    <it.dii.unipi.myapplication.ui.components.WaveformView
         android:id="@+id/waveformView"
         android:layout_width="match_parent"
         android:layout_height="200dp"

@@ -12,7 +12,7 @@
         android:id="@+id/tvRegisterTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Registrazione"
+        android:text="@string/registration_title"
         android:textSize="28sp"
         android:textColor="@color/black"
         android:fontFamily="@font/inter"
@@ -25,7 +25,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilUsername"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:hint="Username"
+        android:hint="@string/registration_username"
         app:boxStrokeColor="@color/primary_blue"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -45,7 +45,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilPassword"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:hint="Password"
+        android:hint="@string/registration_password"
         app:boxStrokeColor="@color/primary_blue"
         android:layout_width="0dp"
         app:endIconMode="password_toggle"
@@ -66,7 +66,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilConfirmPassword"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:hint="Conferma Password"
+        android:hint="@string/registration_confirm_password"
         app:boxStrokeColor="@color/primary_blue"
         android:layout_width="0dp"
         app:endIconMode="password_toggle"
@@ -86,7 +86,7 @@
     <!-- Register Button -->
     <Button
         android:id="@+id/btnRegister"
-        android:text="Registrati"
+        android:text="@string/registration_sign_up_button"
         android:textAllCaps="false"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -98,7 +98,7 @@
     <!-- Go Back Button -->
     <Button
         android:id="@+id/btnBack"
-        android:text="Torna Indietro"
+        android:text="@string/registration_go_back_button"
         android:textAllCaps="false"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

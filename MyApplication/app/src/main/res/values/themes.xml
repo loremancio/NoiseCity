@@ -2,28 +2,31 @@
 <resources>
 
     <style name="Theme.MyApplication" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Colore “brand” principale -->
         <item name="colorPrimary">@color/primary_blue</item>
-        <!-- Variante scura, usata di default per la status‑bar -->
         <item name="colorPrimaryVariant">@color/primary_blue_dark</item>
-        <!-- Colore del testo/icona su primary -->
         <item name="colorOnPrimary">@color/on_primary_blue</item>
-
-        <!-- Questo fa sì che la status‑bar prenda davvero colorPrimaryVariant -->
-        <item name="android:statusBarColor">@color/primary_blue_dark</item>  <!-- :contentReference[oaicite:0]{index=0} -->
-
-        <!-- Se vuoi anche la navigation‑bar abbinata -->
+        <item name="android:statusBarColor">@color/primary_blue_dark</item>
         <item name="android:navigationBarColor">@color/primary_blue_dark</item>
-
-        <!-- Bottoni Material: usano colorPrimary di default, ma puoi personalizzarli -->
         <item name="materialButtonStyle">@style/Widget.MyApp.MaterialButton</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.MyApp.AlertDialog</item>
     </style>
 
     <style name="Widget.MyApp.MaterialButton"
         parent="Widget.MaterialComponents.Button">
-        <!-- sfondo -->
         <item name="android:backgroundTint">@color/primary_blue</item>
-        <!-- testo -->
         <item name="android:textColor">@color/on_primary_blue</item>
+    </style>
+
+    <style name="ThemeOverlay.MyApp.AlertDialog"
+        parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorSurface">@color/primary_blue</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.MyApp.Dialog</item>
+    </style>
+
+    <style name="ShapeAppearance.MyApp.Dialog"
+        parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
     </style>
 </resources>

@@ -3,16 +3,14 @@ package it.dii.unipi.myapplication.ui.components
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Color
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.ContextCompat
+import it.dii.unipi.myapplication.R
 import it.dii.unipi.myapplication.model.AudioSample
-import kotlin.math.roundToInt
+import android.graphics.Color
 
-/**
- * Custom view to display the waveform of an audio sample.
- */
 class WaveformView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -20,40 +18,41 @@ class WaveformView @JvmOverloads constructor(
 ) : View(context, attrs, defStyle) {
 
     private var audioSample: AudioSample? = null
+
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         strokeWidth = 2f
-        color = Color.WHITE  // default line color
+        color = ContextCompat.getColor(context, R.color.primary_blue)
     }
 
     private val backgroundPaint = Paint().apply {
-        color = Color.BLACK  // default background color
+        color = ContextCompat.getColor(context, R.color.white)
     }
-    
+
     private val axisPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        strokeWidth = 2f  // Increased line thickness
-        color = Color.LTGRAY
+        strokeWidth = 2f
+        color = ContextCompat.getColor(context, R.color.primary_blue)
     }
-    
+
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        strokeWidth = 1.2f  // Increased line thickness
-        color = Color.DKGRAY
-        alpha = 180  // Increased visibility
+        strokeWidth = 1.2f
+        color = ContextCompat.getColor(context, R.color.primary_blue)
+        alpha = 180
     }
-    
+
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        textSize = 40f  // Increased text size
-        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        color = ContextCompat.getColor(context, R.color.primary_blue)
+        textSize = 25f
+        typeface = Typeface.create("inter", Typeface.NORMAL)
     }
-    
+
     private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.CYAN  // Different color for axis titles
-        textSize = 44f
-        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        color = ContextCompat.getColor(context, R.color.primary_blue)
+        textSize = 25f
+        typeface = Typeface.create("inter", Typeface.BOLD)
     }
-    
+
     // Constants for axes
-    private val axisMargin = 120f  // Increased margin
+    private val axisMargin = 120f
     private val tickLength = 10f
     private val labelMargin = 15f
     private val sampleRate = 44_100 // Hz
@@ -72,12 +71,12 @@ class WaveformView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Draw background
-        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), backgroundPaint)
+        // Draw background (transparent, so no need to draw a rectangle)
+        canvas.drawColor(Color.TRANSPARENT)
         
         // Define drawing area
         val leftMargin = axisMargin
-        val topMargin = 90f  // Increased top margin for Y-axis title
+        val topMargin = 90f
         val rightMargin = 50f
         val bottomMargin = axisMargin * 1.5f
         
@@ -85,7 +84,7 @@ class WaveformView @JvmOverloads constructor(
         val drawingHeight = height - topMargin - bottomMargin
         
         // Y-axis title position (drawn before grid and axes)
-        val yAxisTitleX = 30f  // Position far left
+        val yAxisTitleX = 30f
         val yAxisTitleY = topMargin + drawingHeight / 2
         
         // Draw the Y-axis title first
@@ -195,24 +194,11 @@ class WaveformView @JvmOverloads constructor(
                     // Draw tick mark
                     canvas.drawLine(x, topMargin + height, x, topMargin + height + tickLength, axisPaint)
                     
-                    // Draw label with background for better visibility
+                    // Draw label
                     val labelText = "${marker}ms"
                     val textWidth = textPaint.measureText(labelText)
                     val textX = x - textWidth / 2
                     val textY = topMargin + height + tickLength + labelMargin + textPaint.textSize / 2
-                    
-                    // Draw text background
-                    val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                        color = Color.parseColor("#88000000") // More visible semi-transparent black
-                    }
-                    val padding = 8f
-                    canvas.drawRect(
-                        textX - padding,
-                        textY - textPaint.textSize,
-                        textX + textWidth + padding,
-                        textY + padding,
-                        bgPaint
-                    )
                     
                     // Draw text
                     canvas.drawText(labelText, textX, textY, textPaint)
@@ -226,25 +212,12 @@ class WaveformView @JvmOverloads constructor(
             // Draw tick mark
             canvas.drawLine(leftMargin - tickLength, y, leftMargin, y, axisPaint)
             
-            // Draw amplitude label with background for better visibility
+            // Draw amplitude label
             if (marker == 0f) {
                 val labelText = "0"  // Simplified label for zero
                 val textWidth = textPaint.measureText(labelText)
                 val textX = leftMargin - textWidth - 10f
                 val textY = y + textPaint.textSize / 3
-                
-                // Draw text background
-                val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.parseColor("#88000000") // More visible semi-transparent black
-                }
-                val padding = 8f
-                canvas.drawRect(
-                    textX - padding,
-                    textY - textPaint.textSize + padding,
-                    textX + textWidth + padding,
-                    textY + padding,
-                    bgPaint
-                )
                 
                 // Draw text
                 canvas.drawText(labelText, textX, textY, textPaint)
@@ -253,19 +226,6 @@ class WaveformView @JvmOverloads constructor(
                 val textWidth = textPaint.measureText(labelText)
                 val textX = leftMargin - textWidth - 10f
                 val textY = y + textPaint.textSize / 3
-                
-                // Draw text background
-                val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.parseColor("#88000000") // More visible semi-transparent black
-                }
-                val padding = 8f
-                canvas.drawRect(
-                    textX - padding,
-                    textY - textPaint.textSize + padding,
-                    textX + textWidth + padding,
-                    textY + padding,
-                    bgPaint
-                )
                 
                 // Draw text
                 canvas.drawText(labelText, textX, textY, textPaint)
@@ -277,19 +237,6 @@ class WaveformView @JvmOverloads constructor(
         val xLabelWidth = titlePaint.measureText(xLabelText)
         val xLabelX = leftMargin + width / 2 - xLabelWidth / 2
         val xLabelY = topMargin + height + tickLength + labelMargin + textPaint.textSize * 1.8f
-        
-        // Draw text background
-        val xLabelBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#88000000") // More visible semi-transparent black
-        }
-        val xPadding = 12f
-        canvas.drawRect(
-            xLabelX - xPadding,
-            xLabelY - titlePaint.textSize,
-            xLabelX + xLabelWidth + xPadding,
-            xLabelY + xPadding,
-            xLabelBgPaint
-        )
         
         // Draw X-axis label
         canvas.drawText(xLabelText, xLabelX, xLabelY, titlePaint)
