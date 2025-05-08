@@ -17,6 +17,9 @@ import androidx.core.content.ContextCompat
 import it.dii.unipi.myapplication.R
 import it.dii.unipi.myapplication.ui.components.WaveformView
 import it.dii.unipi.myapplication.model.AudioSample
+import it.dii.unipi.myapplication.model.DataSender
+import it.dii.unipi.myapplication.model.LocationHelper
+import it.dii.unipi.myapplication.model.SessionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -35,6 +38,7 @@ class SoundSamplingActivity : AppCompatActivity() {
 
     private var audioRecord: AudioRecord? = null
     private var recordingJob: Job? = null
+    private var audioSample: AudioSample? = null
 
     private val permissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -139,6 +143,7 @@ class SoundSamplingActivity : AppCompatActivity() {
                             shortBuffer[i] / Short.MAX_VALUE.toFloat()
                         }
                         val sample = AudioSample(floatBuffer)
+                        audioSample = sample.samples
                         withContext(Dispatchers.Main) {
                             try {
                                 waveformView.setAudioSample(sample)
@@ -157,6 +162,32 @@ class SoundSamplingActivity : AppCompatActivity() {
     }
 
     private fun stopRecording() {
+        val locationHelper = LocationHelper(this)
+        locationHelper.getCurrentLocation { location ->
+            if (location != null) {
+                Log.d(TAG, "stopRecording: Current location: $location")
+                val latitude = location.latitude
+                val longitude = location.longitude
+
+                val audioData = audioSample
+                val duration = calculateAudioDuration()
+                val sessionHelper = SessionManager(this)
+                val username = sessionHelper.getUsernameFromSession()
+
+                val dataSender = DataSender()
+                dataSender.sendAudioData(
+                    username = username,
+                    audioData = audioData,
+                    latitude = latitude,
+                    longitude = longitude,
+                    duration = duration
+                )
+            } else {
+                Log.e(TAG, "stopRecording: Unable to get current location")
+                Toast.makeText(this, "Unable to get current location", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         Log.d(TAG, "stopRecording: Arresto registrazione")
         recordingJob?.cancel()
         audioRecord?.let {
@@ -175,5 +206,11 @@ class SoundSamplingActivity : AppCompatActivity() {
         Log.d(TAG, "onDestroy: Sound Sampling Activity destroyed")
         stopRecording()
         super.onDestroy()
+    }
+
+    fun calculateAudioDuration(audioData: FloatArray, sampleRate: Int = 44100, channelCount: Int = 1): Int {
+        val bytesPerSample = 2 // PCM 16-bit
+        val totalSamples = audioData.size / (bytesPerSample * channelCount)
+        return totalSamples / sampleRate // Durata in secondi
     }
 }

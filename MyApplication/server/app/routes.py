@@ -43,3 +43,18 @@ def logout():
 @login_required
 def profile():
     return jsonify({'username': current_user.username})
+
+@bp.route('/upload', methods=['POST'])
+@login_required
+def upload():
+    data = request.get_json()
+    username = data.get('username')
+    audio_data = data.get('audio_data')
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    timestamp = data.get('timestamp')
+    duration = data.get('duration')
+
+    print(f"Received audio data for {username}: {audio_data}, {latitude}, {longitude}, {timestamp}, {duration}")
+
+    return jsonify({'message': 'Audio data received successfully'})
