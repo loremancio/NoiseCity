@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/soundFragment"
+        android:icon="@drawable/ic_sound_activity"
+        android:title="Sound Wave" />
+    <!-- add more items in the future <item> -->
+</menu>

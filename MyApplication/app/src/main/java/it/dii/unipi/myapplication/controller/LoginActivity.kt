@@ -10,11 +10,12 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import it.dii.unipi.myapplication.R
 import it.dii.unipi.myapplication.model.AuthRepository
-import it.dii.unipi.myapplication.model.LoginResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import it.dii.unipi.myapplication.MainActivity
+import it.dii.unipi.myapplication.model.LoginResult
 
 class LoginActivity : AppCompatActivity() {
 
@@ -64,7 +65,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun performLogin(username: String, password: String) {
-        /*CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             val result = authRepository.login(username, password)
             runOnUiThread {
                 when (result) {
@@ -72,7 +73,7 @@ class LoginActivity : AppCompatActivity() {
                         MaterialAlertDialogBuilder(this@LoginActivity)
                             .setTitle("Login Success!")
                             .show()
-                        val intent = Intent(this@LoginActivity, SoundActivity::class.java)
+                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
                         startActivity(intent)
                         finish()
                     }
@@ -84,9 +85,6 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
             }
-        }*/
-        val intent = Intent(this@LoginActivity, SoundActivity::class.java)
-        startActivity(intent)
-        finish()
+        }
     }
 }
