@@ -12,7 +12,7 @@ import it.dii.unipi.myapplication.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class RegistrationActivity : AppCompatActivity() {
 
@@ -40,7 +40,7 @@ class RegistrationActivity : AppCompatActivity() {
             if (username.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword) {
                 performRegistration(username, password)
             } else {
-                AlertDialog.Builder(this@RegistrationActivity)
+                MaterialAlertDialogBuilder(this@RegistrationActivity)
                     .setTitle("Error in the fields")
                     .setMessage("Fields empty or password mismatch")
                     .show()
@@ -67,7 +67,7 @@ class RegistrationActivity : AppCompatActivity() {
             runOnUiThread {
                 when (result) {
                     is RegistrationResult.Success -> {
-                        AlertDialog.Builder(this@RegistrationActivity)
+                        MaterialAlertDialogBuilder(this@RegistrationActivity)
                             .setTitle("Login Success!")
                             .setMessage(result.message)
                             .show()
@@ -75,7 +75,7 @@ class RegistrationActivity : AppCompatActivity() {
                         finish()
                     }
                     is RegistrationResult.Error -> {
-                        AlertDialog.Builder(this@RegistrationActivity)
+                        MaterialAlertDialogBuilder(this@RegistrationActivity)
                             .setTitle("Login Error")
                             .setMessage(result.message)
                             .show()

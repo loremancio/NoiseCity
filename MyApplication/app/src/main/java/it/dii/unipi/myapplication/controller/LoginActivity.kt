@@ -7,14 +7,15 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import it.dii.unipi.myapplication.R
 import it.dii.unipi.myapplication.model.AuthRepository
-import it.dii.unipi.myapplication.model.LoginResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import it.dii.unipi.myapplication.MainActivity
+import it.dii.unipi.myapplication.model.LoginResult
 
 class LoginActivity : AppCompatActivity() {
 
@@ -40,7 +41,7 @@ class LoginActivity : AppCompatActivity() {
             if (username.isNotEmpty() && password.isNotEmpty()) {
                 performLogin(username, password)
             } else {
-                AlertDialog.Builder(this@LoginActivity)
+                MaterialAlertDialogBuilder(this@LoginActivity)
                     .setTitle("Login Error")
                     .setMessage("Please, insert username and password")
                     .show()
@@ -69,15 +70,15 @@ class LoginActivity : AppCompatActivity() {
             runOnUiThread {
                 when (result) {
                     is LoginResult.Success -> {
-                        AlertDialog.Builder(this@LoginActivity)
+                        MaterialAlertDialogBuilder(this@LoginActivity)
                             .setTitle("Login Success!")
                             .show()
-                        val intent = Intent(this@LoginActivity, SoundActivity::class.java)
+                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
                         startActivity(intent)
                         finish()
                     }
                     is LoginResult.Error -> {
-                        AlertDialog.Builder(this@LoginActivity)
+                        MaterialAlertDialogBuilder(this@LoginActivity)
                             .setTitle("Login Error")
                             .setMessage(result.message)
                             .show()

@@ -9,6 +9,7 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -45,26 +46,26 @@ class SoundSamplingActivity : AppCompatActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(TAG, "onCreate: Inizializzazione activity")
+        Log.d(TAG, "onCreate: Sound Sampling Activity Initialization")
         try {
             super.onCreate(savedInstanceState)
-            Log.d(TAG, "onCreate: super.onCreate completato")
+            Log.d(TAG, "onCreate: super.onCreate done")
             
             setContentView(R.layout.activity_sound_sampling)
-            Log.d(TAG, "onCreate: setContentView completato")
+            Log.d(TAG, "onCreate: setContentView done")
 
             try {
                 waveformView = findViewById(R.id.waveformView)
-                Log.d(TAG, "onCreate: findViewById waveformView completato")
+                Log.d(TAG, "onCreate: findViewById waveformView done")
             } catch (e: Exception) {
-                Log.e(TAG, "Errore durante il recupero di waveformView", e)
+                Log.e(TAG, "Error during getting waveformView", e)
             }
 
             try {
                 btnStart = findViewById(R.id.btnStart)
-                Log.d(TAG, "onCreate: findViewById btnStart completato")
+                Log.d(TAG, "onCreate: findViewById btnStart done")
                 btnStop = findViewById(R.id.btnStop)
-                Log.d(TAG, "onCreate: findViewById btnStop completato")
+                Log.d(TAG, "onCreate: findViewById btnStop done")
             } catch (e: Exception) {
                 Log.e(TAG, "Errore durante il recupero dei pulsanti", e)
             }
@@ -92,7 +93,7 @@ class SoundSamplingActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("MissingPermission") // we've already checked it above
+    @SuppressLint("MissingPermission") // since we've already checked it above
     private fun startRecording() {
         Log.d(TAG, "startRecording: Avvio registrazione")
         // ensure we don't start twice
@@ -171,7 +172,7 @@ class SoundSamplingActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        Log.d(TAG, "onDestroy: Activity distrutta")
+        Log.d(TAG, "onDestroy: Sound Sampling Activity destroyed")
         stopRecording()
         super.onDestroy()
     }

@@ -1,3 +1,15 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name" translatable="false">NoiseCity</string>
+    <string name="login_title">Welcome!</string>
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_sign_in_button">Sign In</string>
+    <string name="login_sign_up_button">Don\'t have an account? Sign Up</string>
+    <string name="login_logo">Logo</string>
+    <string name="registration_title">Sign Up</string>
+    <string name="registration_username">Username</string>
+    <string name="registration_password">Password</string>
+    <string name="registration_confirm_password">Confirm Password</string>
+    <string name="registration_sign_up_button">Sign Up</string>
+    <string name="registration_go_back_button">Go Back to Login</string>
 </resources>
