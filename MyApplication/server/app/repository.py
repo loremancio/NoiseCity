@@ -122,6 +122,50 @@ class MeasurementRepository:
             raise e
 
 
+    @staticmethod
+    def get_aggregated_measurements(geohashes, start_timestamp=None, end_timestamp=None):
+        """
+        Retrieve aggregated measurements within a set of geohashes and an optional time range.
+
+        :param geohashes: List of geohashes to filter
+        :param start_timestamp: Start of the time range (optional)
+        :param end_timestamp: End of the time range (optional)
+        :return: List of aggregated measurements
+        """
+        try:
+            # Build the query
+            query = {"geohash": {"$in": geohashes}}
+
+            # Add timestamp filters if provided
+            if start_timestamp and end_timestamp:
+                query["timestamp"] = {"$gte": start_timestamp, "$lte": end_timestamp}
+            elif start_timestamp:
+                query["timestamp"] = {"$gte": start_timestamp}
+            elif end_timestamp:
+                query["timestamp"] = {"$lte": end_timestamp}
+
+            # Execute the query
+            results = mongo.db.aggregated_measurements.find(query)
+
+            #convert the geohash to its central coordinates
+            for result in results:
+                geohash = result['geohash']
+                # Decode the geohash to get the coordinates
+                lat, lon = Geohash.decode(geohash)
+                # Add the coordinates to the result
+                result['location'] = {
+                    'type': 'Point',
+                    'coordinates': [lon, lat]
+                }
+
+            # Convert the results to a list of dictionaries
+            return [result for result in results]
+
+        except Exception as e:
+            print(f"Error retrieving aggregated measurements: {e}")
+            return []
+
+
 class RawMeasurementRepository:
     @staticmethod
     def insert_raw_measurement(user_id, timestamp, noise_level, location):

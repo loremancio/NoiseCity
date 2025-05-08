@@ -75,11 +75,55 @@ def add_measurement():
             measurement["noise_level"],
             measurement["location"]
         )
-        
+
         if result:
             return jsonify({"message": "Measurement added successfully"}), 201
         else:
             return jsonify({"error": "Failed to add measurement"}), 500
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+from geolib import geohash
+
+@bp.route('/measurements', methods=['GET'])
+def get_measurements():
+    try:
+
+        data = request.get_json()
+        # Parse query parameters
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        radius_km = data.get('radius', 5)
+        start_timestamp = data.get('start_timestamp')
+        end_timestamp = data.get('end_timestamp')
+
+
+        # Validate coordinates
+        if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+            return jsonify({"error": "Invalid coordinates"}), 400
+        if radius_km <= 0:
+            return jsonify({"error": "Radius must be greater than 0"}), 400
+
+        # Parse timestamps if provided
+        start_timestamp = datetime.fromisoformat(start_timestamp.replace("Z", "+00:00")) if start_timestamp else None
+        end_timestamp = datetime.fromisoformat(end_timestamp.replace("Z", "+00:00")) if end_timestamp else None
+
+        # Calculate geohash of level 5
+        geohash_level_6 = geohash.encode(latitude, longitude, precision=6)
+
+        # Get neighboring geohashes
+        neighbors = geohash.neighbours(geohash_level_6)
+        all_geohashes = [geohash_level_6] + [neighbors]  # Include the central geohash
+
+        # Query the database
+        measurements = MeasurementRepository.get_aggregated_measurements(
+            all_geohashes, start_timestamp, end_timestamp
+        )
+
+        # Return the results
+        return jsonify(measurements), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
