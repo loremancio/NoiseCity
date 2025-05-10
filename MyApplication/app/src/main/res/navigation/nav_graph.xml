@@ -10,4 +10,10 @@
         android:label="Sound" >
     </fragment>
 
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="it.dii.unipi.myapplication.ui.screens.map.MapScreen"
+        android:label="Map" >
+    </fragment>
+
 </navigation>
