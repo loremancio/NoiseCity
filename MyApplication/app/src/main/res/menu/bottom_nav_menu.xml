@@ -4,5 +4,8 @@
         android:id="@+id/soundFragment"
         android:icon="@drawable/ic_sound_activity"
         android:title="Sound Wave" />
-    <!-- add more items in the future <item> -->
+    <item
+        android:id="@+id/mapFragment"
+        android:icon="@drawable/ic_map_activity"
+        android:title="HeatMap" />
 </menu>
