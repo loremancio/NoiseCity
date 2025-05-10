@@ -91,13 +91,15 @@ from geolib import geohash
 @bp.route('/measurements', methods=['GET'])
 def get_measurements():
     try:
-        data = request.get_json()
-        # Parse query parameters
-        latitude = data.get('latitude')
-        longitude = data.get('longitude')
-        radius_km = data.get('radius', 5)
-        start_timestamp = data.get('start_timestamp')
-        end_timestamp = data.get('end_timestamp')
+        #print("Received GET request for measurements")
+
+        latitude = request.args.get('latitude', type=float)
+        longitude = request.args.get('longitude', type=float)
+        radius_km = request.args.get('radius', default=5, type=float)
+        start_timestamp = request.args.get('start_timestamp', type=int)
+        end_timestamp = request.args.get('end_timestamp', type=int)
+
+        print("Received parameters:", latitude, longitude, radius_km, start_timestamp, end_timestamp)
 
         # Validate coordinates
         if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):

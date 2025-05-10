@@ -73,6 +73,7 @@ class MeasurementRepository:
             # finding the correct document to be updated
             # searching by geohash and time bucket within an hour
             time_bucket = timestamp.replace(minute=0, second=0, microsecond=0)
+            print("Time bucket:", time_bucket)
 
             #the correct time bucket will be equal to time_bucket
             # and the geohash
