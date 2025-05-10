@@ -47,21 +47,20 @@ def profile():
     return jsonify({'username': current_user.username})
 
 @bp.route('/measurements', methods=['POST'])
-#@login_required
-def add_measurement():
+#@login_requireddef add_measurement():
     try:
         data = request.get_json()
 
-        # Validazione dei dati
+        # Data validation
         required_fields = ["user_id", "timestamp", "noise_level", "location"]
         if not all(field in data for field in required_fields):
             return jsonify({"error": "Missing required fields"}), 400
 
-        # Validazione del formato dei dati
+        # Data format validation
         if not isinstance(data["location"], dict) or "type" not in data["location"] or "coordinates" not in data["location"]:
             return jsonify({"error": "Invalid location format"}), 400
 
-        # Preparazione dei dati per il database
+        # Prepare data for the database
         measurement = {
             "user_id": data["user_id"],
             "timestamp": datetime.fromisoformat(data["timestamp"].replace("Z", "+00:00")),
@@ -69,7 +68,7 @@ def add_measurement():
             "location": data["location"],
         }
 
-        # Inserimento nel database
+        # Database insertion
         result = MeasurementRepository.process_measurement(
             measurement["user_id"],
             measurement["timestamp"],
