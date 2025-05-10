@@ -38,6 +38,7 @@ class SoundController(private val context: Context) {
         
         // Check permission first
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) 
+            == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED
         ) {
             if (!audioRecorder.startRecording()) {
@@ -45,14 +46,14 @@ class SoundController(private val context: Context) {
             }
         } else {
             Log.d(TAG, "Recording permission not granted")
-            Toast.makeText(context, "Microphone permission required", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Microphone permission required or position permission required", Toast.LENGTH_SHORT).show()
             // The fragment/activity should handle requesting permissions
         }
     }
     
     fun stopRecording() {
         Log.d(TAG, "Stopping recording")
-        audioRecorder.stopRecording()
+        audioRecorder.stopRecording(context)
     }
     
     fun isRecording(): Boolean {

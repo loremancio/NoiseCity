@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from app.repository import UserRepository
 from app.extensions import login_manager
+from app.extensions import mongo
 
 bp = Blueprint('main', __name__)
 
@@ -45,16 +46,9 @@ def profile():
     return jsonify({'username': current_user.username})
 
 @bp.route('/upload', methods=['POST'])
-@login_required
 def upload():
     data = request.get_json()
-    username = data.get('username')
-    audio_data = data.get('audio_data')
-    latitude = data.get('latitude')
-    longitude = data.get('longitude')
-    timestamp = data.get('timestamp')
-    duration = data.get('duration')
-
-    print(f"Received audio data for {username}: {audio_data}, {latitude}, {longitude}, {timestamp}, {duration}")
+    print(f"Received data")
+    print(data)
 
     return jsonify({'message': 'Audio data received successfully'})

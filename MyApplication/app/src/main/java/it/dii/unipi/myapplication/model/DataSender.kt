@@ -1,5 +1,6 @@
 package it.dii.unipi.myapplication.model
 
+import android.provider.MediaStore.Audio
 import it.dii.unipi.myapplication.app.Config
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -17,14 +18,13 @@ import java.util.Date
 class DataSender {
     private val client = OkHttpClient()
 
-    // Function to send audio sample data to the server
     fun sendAudioData(
         username: String,
-        audioData: ByteArray,
+        audioData: FloatArray,
         latitude: Double,
         longitude: Double,
         duration: Int
-    ) {
+    ): AudioResult {
         val json = JSONObject()
             .put("username", username)
             .put("audio_data", audioData)
@@ -42,15 +42,25 @@ class DataSender {
             .addHeader("Content-Type", "application/json")
             .build()
 
-        try {
+        return try {
             val response = client.newCall(request).execute()
             if (response.isSuccessful) {
-                println("Data sent successfully: ${response.body?.string()}")
+                val cookie = response.header("Set-Cookie")
+                if (cookie != null) {
+                    AudioResult.Success(cookie)
+                } else {
+                    AudioResult.Error("Cookie not found in response")
+                }
             } else {
-                println("Failed to send data: ${response.code}")
+                AudioResult.Error("Error: ${response.code}")
             }
         } catch (e: IOException) {
-            println("Network Error: ${e.message}")
+            AudioResult.Error("Network Error: ${e.message}")
         }
     }
+}
+
+sealed class AudioResult {
+    data class Success(val cookie: String) : AudioResult()
+    data class Error(val message: String) : AudioResult()
 }

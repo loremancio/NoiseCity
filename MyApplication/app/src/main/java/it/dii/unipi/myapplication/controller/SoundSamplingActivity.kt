@@ -25,6 +25,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
+
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+
 
 class SoundSamplingActivity : AppCompatActivity() {
 
@@ -38,7 +45,7 @@ class SoundSamplingActivity : AppCompatActivity() {
 
     private var audioRecord: AudioRecord? = null
     private var recordingJob: Job? = null
-    private var audioSample: AudioSample? = null
+    private var audioSample: FloatArray? = null
 
     private val permissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -162,15 +169,19 @@ class SoundSamplingActivity : AppCompatActivity() {
     }
 
     private fun stopRecording() {
-        val locationHelper = LocationHelper(this)
+        /*val locationHelper = LocationHelper(this)
         locationHelper.getCurrentLocation { location ->
             if (location != null) {
                 Log.d(TAG, "stopRecording: Current location: $location")
                 val latitude = location.latitude
                 val longitude = location.longitude
 
-                val audioData = audioSample
-                val duration = calculateAudioDuration()
+                val audioData = audioSample?:run {
+                    Log.e(TAG, "stopRecording: Audio data is null")
+                    return@getCurrentLocation
+                }
+
+                val duration = calculateAudioDuration(audioData)
                 val sessionHelper = SessionManager(this)
                 val username = sessionHelper.getUsernameFromSession()
 
@@ -186,7 +197,7 @@ class SoundSamplingActivity : AppCompatActivity() {
                 Log.e(TAG, "stopRecording: Unable to get current location")
                 Toast.makeText(this, "Unable to get current location", Toast.LENGTH_SHORT).show()
             }
-        }
+        }*/
 
         Log.d(TAG, "stopRecording: Arresto registrazione")
         recordingJob?.cancel()
@@ -200,6 +211,39 @@ class SoundSamplingActivity : AppCompatActivity() {
             }
         }
         audioRecord = null
+
+        // Invia il JSON al server
+        val json = JSONObject().apply {
+            put("message", "ciao")
+        }
+        val requestBody = json.toString().toRequestBody("application/json".toMediaType())
+
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("http://192.168.117.250:5000/upload") // Sostituisci <server-url> con l'URL del tuo server
+            .post(requestBody)
+            .build()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                Log.d(TAG, "stopRecording: Invio richiesta al server")
+                val response = client.newCall(request).execute()
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        Log.d(TAG, "stopRecording: JSON inviato con successo")
+                        Toast.makeText(this@SoundSamplingActivity, "Dati inviati con successo", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Log.e(TAG, "stopRecording: Errore durante l'invio dei dati - ${response.code}")
+                        Toast.makeText(this@SoundSamplingActivity, "Errore durante l'invio dei dati", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "stopRecording: Eccezione durante l'invio dei dati", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@SoundSamplingActivity, "Errore di connessione", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
