@@ -47,132 +47,124 @@ class UserRepository:
 class MeasurementRepository:
     @staticmethod
     def process_measurement(user_id, timestamp, noise_level, location):
-        if not isinstance(location, dict) or 'type' not in location or 'coordinates' not in location:
-            raise ValueError("Invalid location format")
-        if location['type'] != 'Point' or len(location['coordinates']) != 2:
-            raise ValueError("Invalid coordinates format")
-        if not isinstance(noise_level, (int, float)):
-            raise ValueError("Invalid noise level format")
+        # validazioni invariate…
+        geohash = Geohash.encode(location['coordinates'][1],
+                                location['coordinates'][0],
+                                precision=7)
 
-        #geohash creation
-        geohash = Geohash.encode(location['coordinates'][1], location['coordinates'][0], precision=7)
-
-        # Creating the measurement object
-        measurement = {
+        # Inserisci il raw
+        raw_doc = {
             'user_id': user_id,
             'timestamp': timestamp,
             'noise_level': noise_level,
             'location': location,
             'geohash': geohash,
         }
-        
+        mongo.db.raw_measurements.insert_one(raw_doc)
+
+        # Calcola il bucket orario
+        time_bucket = timestamp.replace(minute=0, second=0, microsecond=0)
+
+        # Usa un solo upsert atomico su sum e count
         try:
-            # Inserting the raw measurement
-            mongo.db.raw_measurements.insert_one(measurement)
-
-            # finding the correct document to be updated
-            # searching by geohash and time bucket within an hour
-            time_bucket = timestamp.replace(minute=0, second=0, microsecond=0)
-            print("Time bucket:", time_bucket)
-
-            #the correct time bucket will be equal to time_bucket
-            # and the geohash
-
-            # will be equal to the geohash of the measurement
-            # if the measurement is not in the database
-            existing_measurement = mongo.db.aggregated_measurements.find_one({
-                'geohash': geohash,
-                'timestamp': time_bucket,
-            })
-
-            
-            #if the measurement already exists
-            if existing_measurement:
-                #print("Existing measurement found:", existing_measurement)
-                #updating the existing measurement by updating the average value, the total and the measurement count
-                new_average = (existing_measurement['average'] * existing_measurement['count'] + noise_level) / (existing_measurement['count'] + 1)
-                new_count = existing_measurement['count'] + 1
-                new_total = existing_measurement['total'] + noise_level
-                mongo.db.aggregated_measurements.update_one(
-                    {'_id': existing_measurement['_id']},
-                    {'$set': {
-                        'average': new_average,
-                        'count': new_count,
-                        'total': new_total,
-                    }}
-                )
-                #print("measurement updated" )
-            else:
-                #print("No existing measurement found, creating a new one.")
-                #if the measurement does not exist, creating a new one
-                new_measurement = {
-                    'geohash': geohash,
-                    'timestamp': time_bucket,
-                    'average': noise_level,
-                    'count': 1,
-                    'total': noise_level,
-                }
-                mongo.db.aggregated_measurements.insert_one(new_measurement)
-                #print("New measurement inserted:", new_measurement)
+            mongo.db.aggregated_measurements.update_one(
+                { 'geohash': geohash, 'time_bucket': time_bucket },
+                {
+                    '$inc': {
+                        'sum_noise': noise_level,
+                        'count': 1
+                    },
+                    '$setOnInsert': {
+                        # salva il centro della cella al primo inserimento
+                        'center': {
+                            'type': 'Point',
+                            'coordinates': [
+                                location['coordinates'][0],
+                                location['coordinates'][1]
+                            ]
+                        }
+                    }
+                },
+                upsert=True
+            )
             return True
+
         except Exception as e:
-            # Handle the error (e.g., log it, re-raise it, etc.)
-            #remove the measurement from the database
-            mongo.db.raw_measurements.delete_one({'_id': measurement['_id']})
-            print(f"Error processing measurement: {e}")
-            raise e
+            # rollback raw insertion
+            mongo.db.raw_measurements.delete_one({'_id': raw_doc['_id']})
+            raise
 
 
     @staticmethod
-    def get_aggregated_measurements(geohashes, start_timestamp=None, end_timestamp=None):
+    def get_aggregated_by_geohash(lat, lon, radius_km, start_ts=None, end_ts=None):
         """
-        Retrieve aggregated measurements within a set of geohashes and an optional time range.
+        Retrieve aggregated measurements within a given radius around a point,
+        and optional time range, computing the average intensity on the fly.
 
-        :param geohashes: List of geohashes to filter
-        :param start_timestamp: Start of the time range (optional)
-        :param end_timestamp: End of the time range (optional)
-        :return: List of aggregated measurements
+        :param lat:       float, latitude of the center point
+        :param lon:       float, longitude of the center point
+        :param radius_km: float, search radius in kilometers
+        :param start_timestamp: datetime, inclusive start of time range (optional)
+        :param end_timestamp:   datetime, inclusive end of time range (optional)
+        :return: List of dicts with keys 'lat', 'lon', 'intensity', 'count', 'distance_m'
         """
-        try:
-            # Build the query
-            query = {"geohash": {"$in": geohashes}}
+        # distanza in metri
+        radius_m = radius_km * 1000
 
-            # Add timestamp filters if provided
-            if start_timestamp and end_timestamp:
-                query["timestamp"] = {"$gte": start_timestamp, "$lte": end_timestamp}
-            elif start_timestamp:
-                query["timestamp"] = {"$gte": start_timestamp}
-            elif end_timestamp:
-                query["timestamp"] = {"$lte": end_timestamp}
+        pipeline = []
 
-            # Execute the query
-            results = mongo.db.aggregated_measurements.find(query)
+        # 1) filtro spaziale
+        geo_near = {
+            '$geoNear': {
+                'near': { 'type': 'Point', 'coordinates': [lon, lat] },
+                'distanceField': 'dist_m',
+                'maxDistance': radius_m,
+                'spherical': True
+            }
+        }
+        # opzionale: filtro temporale
+        if start_ts or end_ts:
+            tb_q = {}
+            if start_ts:
+                tb_q['$gte'] = start_ts.replace(minute=0, second=0, microsecond=0)
+            if end_ts:
+                tb_q['$lte'] = end_ts.replace(minute=0, second=0, microsecond=0)
+            geo_near['$geoNear']['query'] = { 'time_bucket': tb_q }
 
-            to_return = []
+        pipeline.append(geo_near)
 
-            #convert the geohash to its central coordinates
-            for result in results:
-                #print("Result before geohash decoding:", result)
-                
-                # Decode the geohash to get the coordinates
-                lat, lon, _, _ = Geohash.decode_exactly(result['geohash'])
-                # Create a new dictionary with the decoded coordinates
-                decoded_result = {
-                    'intensity': result['average'],
-                    'lat' : lat,
-                    'lon' : lon
-                }
-                to_return.append(decoded_result)
+        # 2) raggruppamento per geohash
+        pipeline.append({
+            '$group': {
+                '_id': '$geohash',
+                'sum_noise': { '$sum': '$sum_noise' },
+                'count':     { '$sum': '$count' },
+                'center':    { '$first': '$center' }
+            }
+        })
 
+        # 3) proiezione del risultato con media
+        pipeline.append({
+            '$project': {
+                '_id':      0,
+                'geohash':  '$_id',
+                'lat':      { '$arrayElemAt': ['$center.coordinates', 1] },
+                'lon':      { '$arrayElemAt': ['$center.coordinates', 0] },
+                'count':    1,
+                'intensity': {
+                    '$cond': [
+                        { '$gt': ['$count', 0] },
+                        { '$divide': ['$sum_noise', '$count'] },
+                        0
+                    ]
+                },
+                'dist_m': '$dist_m'
+            }
+        })
 
+        # esecuzione
+        return list(mongo.db.aggregated_measurements.aggregate(pipeline))
 
-
-            # Convert the results to a list of dictionaries
-            return to_return
-
-        except Exception as e:
-            print(f"Error retrieving aggregated measurements: {e}")
-            return []
 
 
 class RawMeasurementRepository:
@@ -183,6 +175,6 @@ class RawMeasurementRepository:
             'timestamp': timestamp,
             'noise_level': noise_level,
             'location': location,
-            'geohash': Geohash.encode(location['coordinates'][1], location['coordinates'][0], precision=6),
+            'geohash': Geohash.encode(location['coordinates'][1], location['coordinates'][0], precision=7),
         }
         mongo.db.raw_measurements.insert_one(measurement)

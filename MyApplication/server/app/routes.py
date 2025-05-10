@@ -99,39 +99,45 @@ from geolib import geohash
 @bp.route('/measurements', methods=['GET'])
 def get_measurements():
     try:
-        #print("Received GET request for measurements")
-
         latitude = request.args.get('latitude', type=float)
         longitude = request.args.get('longitude', type=float)
-        radius_km = request.args.get('radius', default=5, type=float)
-        start_timestamp = request.args.get('start_timestamp', type=int)
-        end_timestamp = request.args.get('end_timestamp', type=int)
+        radius_km = request.args.get('radius', type=float, default=1.0)
+        start_ts_str = request.args.get('start_timestamp')
+        end_ts_str   = request.args.get('end_timestamp')
 
-        print("Received parameters:", latitude, longitude, radius_km, start_timestamp, end_timestamp)
-
-        # Validate coordinates
+        if latitude is None or longitude is None or radius_km is None:
+            return jsonify({"error": "Missing required query parameters"}), 400
         if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
             return jsonify({"error": "Invalid coordinates"}), 400
         if radius_km <= 0:
-            return jsonify({"error": "Radius must be greater than 0"}), 400
+            return jsonify({"error": "Radius must be > 0"}), 400
 
-        # Parse timestamps if provided
-        start_timestamp = datetime.fromisoformat(start_timestamp.replace("Z", "+00:00")) if start_timestamp else None
-        end_timestamp = datetime.fromisoformat(end_timestamp.replace("Z", "+00:00")) if end_timestamp else None
+        # 3) Parse optional timestamps
+        start_ts = None
+        end_ts   = None
+        if start_ts_str:
+            try:
+                start_ts = datetime.fromisoformat(start_ts_str.replace("Z", "+00:00"))
+            except ValueError:
+                return jsonify({"error": "Invalid start_timestamp format"}), 400
+        if end_ts_str:
+            try:
+                end_ts = datetime.fromisoformat(end_ts_str.replace("Z", "+00:00"))
+            except ValueError:
+                return jsonify({"error": "Invalid end_timestamp format"}), 400
 
-        #print("Received parameters:", latitude, longitude, radius_km, start_timestamp, end_timestamp)
-        all_geohashes = get_geohashes_within_radius(latitude, longitude, radius_km, precision=7)
-        #print("Geohashes within radius:", all_geohashes)
-
-        # Query the database
-        measurements = MeasurementRepository.get_aggregated_measurements(
-            all_geohashes, start_timestamp, end_timestamp
+        # 4) Fetch aggregated measurements by geohash
+        measurements = MeasurementRepository.get_aggregated_by_geohash(
+            lat=latitude,
+            lon=longitude,
+            radius_km=radius_km,
+            start_ts=start_ts,
+            end_ts=end_ts
         )
-        #print("Returned measurements:", measurements)
 
-        # Return the results
+        # 5) Return JSON
         return jsonify(measurements), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+        # Log the error server‐side as needed
+        return jsonify({"error": "Server error", "details": str(e)}), 500
