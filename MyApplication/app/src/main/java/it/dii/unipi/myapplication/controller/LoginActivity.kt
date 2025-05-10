@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import it.dii.unipi.myapplication.MainActivity
 import it.dii.unipi.myapplication.model.LoginResult
+import it.dii.unipi.myapplication.model.SessionManager
 
 class LoginActivity : AppCompatActivity() {
 
@@ -70,6 +71,9 @@ class LoginActivity : AppCompatActivity() {
             runOnUiThread {
                 when (result) {
                     is LoginResult.Success -> {
+                        val sessionManager = SessionManager(this@LoginActivity)
+                        sessionManager.saveUsernameToSession(username)
+
                         MaterialAlertDialogBuilder(this@LoginActivity)
                             .setTitle("Login Success!")
                             .show()

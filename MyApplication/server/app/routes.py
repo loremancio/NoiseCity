@@ -46,6 +46,14 @@ def logout():
 def profile():
     return jsonify({'username': current_user.username})
 
+@bp.route('/upload', methods=['POST'])
+def upload():
+    data = request.get_json()
+    print(f"Received data")
+    print(data)
+
+    return jsonify({'message': 'Audio data received successfully'})
+
 @bp.route('/measurements', methods=['POST'])
 #@login_requireddef add_measurement():
 def add_measurement():
@@ -126,3 +134,4 @@ def get_measurements():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
