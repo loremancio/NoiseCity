@@ -4,6 +4,7 @@ from app.repository import UserRepository, MeasurementRepository
 from app.extensions import login_manager
 from datetime import datetime
 from app.utils import get_geohashes_within_radius
+from logging import log
 
 bp = Blueprint('main', __name__)
 
@@ -63,10 +64,12 @@ def add_measurement():
         # Data validation
         required_fields = ["user_id", "timestamp", "noise_level", "location"]
         if not all(field in data for field in required_fields):
+            log.error(f"Missing required fields: {required_fields}")
             return jsonify({"error": "Missing required fields"}), 400
 
         # Data format validation
         if not isinstance(data["location"], dict) or "type" not in data["location"] or "coordinates" not in data["location"]:
+            log.error(f"Invalid location format: {data['location']}")
             return jsonify({"error": "Invalid location format"}), 400
 
         # Prepare data for the database
@@ -75,6 +78,7 @@ def add_measurement():
             "timestamp": datetime.fromisoformat(data["timestamp"].replace("Z", "+00:00")),
             "noise_level": data["noise_level"],
             "location": data["location"],
+            "duration": data.get("duration", 0),
         }
 
         # Database insertion
@@ -82,7 +86,8 @@ def add_measurement():
             measurement["user_id"],
             measurement["timestamp"],
             measurement["noise_level"],
-            measurement["location"]
+            measurement["location"],
+            measurement["duration"]
         )
 
         if result:
@@ -94,7 +99,6 @@ def add_measurement():
         return jsonify({"error": str(e)}), 500
 
 
-from geolib import geohash
 
 @bp.route('/measurements', methods=['GET'])
 def get_measurements():

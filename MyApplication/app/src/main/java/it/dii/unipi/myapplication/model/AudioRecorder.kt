@@ -2,29 +2,41 @@ package it.dii.unipi.myapplication.model
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Location
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.util.Log
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import kotlinx.coroutines.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlin.math.log10
+import kotlin.math.sqrt
 
 /**
- * Model class that handles audio recording functionality
+ * Handles audio recording and periodic sending of noise measurements.
  */
-class AudioRecorder {
+class AudioRecorder (
+    private val context: Context,
+
+){
     companion object {
         private const val TAG = "AudioRecorder"
         private const val SAMPLE_RATE = 44_100
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO
         private const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
     }
-
+    private val audioSender = DataSender(context)
     private var audioRecord: AudioRecord? = null
     private var recordingJob: Job? = null
     private val bufferSize: Int by lazy {
@@ -69,12 +81,13 @@ class AudioRecorder {
                             val floatBuffer = FloatArray(read) { i ->
                                 shortBuffer[i] / Short.MAX_VALUE.toFloat()
                             }
-                            audioSamples = floatBuffer
-                            val sample = AudioSample(floatBuffer)
-                            avg = sample.getAvg()
-
+                           
                             withContext(Dispatchers.Main) {
-                                sampleCallback?.invoke(sample)
+                                sampleCallback?.invoke(AudioSample(floatBuffer))
+                            }
+                            
+                            launch(Dispatchers.Default) { 
+                                audioSender.processBuffer(floatBuffer)
                             }
                         }
                     } catch (e: Exception) {
@@ -93,87 +106,20 @@ class AudioRecorder {
         }
     }
 
-    fun stopRecording(context: Context) {
-        Log.d(TAG, "Stopping recording")
 
-        if (audioRecord == null) {
-            Log.d(TAG, "AudioRecord is null, nothing to stop")
-            return
-        }
 
-        // read the audio data from audioRecord
-        val locationHelper = LocationHelper(context)
-        val sessionManager = SessionManager(context)
-        val username = sessionManager.getUsernameFromSession()
-        val currentTimestamp = System.currentTimeMillis()
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-        val formattedDate = dateFormat.format(currentTimestamp)
-        var duration = 0.0
-        audioSamples?.let { samples ->
-            duration = calculateAudioDuration(samples)
-        } ?: run {
-            Log.e(TAG, "stopRecording: No audio samples available")
-            return
-        }
 
-        locationHelper.getCurrentLocation { location ->
-            if (location != null) {
-                Log.d(TAG, "stopRecording: Current location: $location")
-                val latitude = location.latitude
-                val longitude = location.longitude
-
-                val json = JSONObject()
-                    .put("latitude", latitude)
-                    .put("longitude", longitude)
-                    .put("username", username)
-                    .put("audio", avg)
-                    .put("timestamp", currentTimestamp)
-                    .put("formattedDate", formattedDate)
-                    .put("duration", duration)
-                    .toString()
-
-                val requestBody = json.toRequestBody("application/json".toMediaType())
-                val request = okhttp3.Request.Builder()
-                    .url("http://192.168.117.250:5000/upload")
-                    .post(requestBody)
-                    .addHeader("Content-Type", "application/json")
-                    .build()
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        val response = okhttp3.OkHttpClient().newCall(request).execute()
-                        if (response.isSuccessful) {
-                            Log.d(TAG, "Request successful: ${response.body?.string()}")
-                        } else {
-                            Log.e(TAG, "Request failed: ${response.code}")
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Network error", e)
-                    }
-                }
-            } else {
-                Log.e(TAG, "stopRecording: Unable to get current location")
-            }
-        }
-
+    fun stopRecording() {
         recordingJob?.cancel()
-        audioRecord?.let {
-            try {
-                it.stop()
-                it.release()
-                Log.d(TAG, "AudioRecord stopped and released")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error stopping recording", e)
-            }
+        audioRecord?.apply {
+            stop()
+            release()
         }
         audioRecord = null
     }
-    
-    fun isRecording(): Boolean {
-        return audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING
-    }
 
-    fun calculateAudioDuration(audioData: FloatArray, sampleRate: Int = SAMPLE_RATE): Double {
-        return audioData.size.toDouble() / sampleRate
-    }
+   
+    fun isRecording(): Boolean =
+        audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING
 }
+
