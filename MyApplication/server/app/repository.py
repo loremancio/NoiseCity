@@ -100,7 +100,7 @@ class MeasurementRepository:
                         'total': new_total,
                     }}
                 )
-                print("measurement updated" )
+                #print("measurement updated" )
             else:
                 #print("No existing measurement found, creating a new one.")
                 #if the measurement does not exist, creating a new one

@@ -109,15 +109,15 @@ def get_measurements():
         start_timestamp = datetime.fromisoformat(start_timestamp.replace("Z", "+00:00")) if start_timestamp else None
         end_timestamp = datetime.fromisoformat(end_timestamp.replace("Z", "+00:00")) if end_timestamp else None
 
-        print("Received parameters:", latitude, longitude, radius_km, start_timestamp, end_timestamp)
+        #print("Received parameters:", latitude, longitude, radius_km, start_timestamp, end_timestamp)
         all_geohashes = get_geohashes_within_radius(latitude, longitude, radius_km, precision=7)
-        print("Geohashes within radius:", all_geohashes)
+        #print("Geohashes within radius:", all_geohashes)
 
         # Query the database
         measurements = MeasurementRepository.get_aggregated_measurements(
             all_geohashes, start_timestamp, end_timestamp
         )
-        print("Returned measurements:", measurements)
+        #print("Returned measurements:", measurements)
 
         # Return the results
         return jsonify(measurements), 200
