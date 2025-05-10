@@ -55,7 +55,7 @@ class MeasurementRepository:
             raise ValueError("Invalid noise level format")
 
         #geohash creation
-        geohash = Geohash.encode(location['coordinates'][1], location['coordinates'][0], precision=6)
+        geohash = Geohash.encode(location['coordinates'][1], location['coordinates'][0], precision=7)
 
         # Creating the measurement object
         measurement = {
@@ -87,7 +87,7 @@ class MeasurementRepository:
             
             #if the measurement already exists
             if existing_measurement:
-                print("Existing measurement found:", existing_measurement)
+                #print("Existing measurement found:", existing_measurement)
                 #updating the existing measurement by updating the average value, the total and the measurement count
                 new_average = (existing_measurement['average'] * existing_measurement['count'] + noise_level) / (existing_measurement['count'] + 1)
                 new_count = existing_measurement['count'] + 1
@@ -102,7 +102,7 @@ class MeasurementRepository:
                 )
                 print("measurement updated" )
             else:
-                print("No existing measurement found, creating a new one.")
+                #print("No existing measurement found, creating a new one.")
                 #if the measurement does not exist, creating a new one
                 new_measurement = {
                     'geohash': geohash,
@@ -112,7 +112,7 @@ class MeasurementRepository:
                     'total': noise_level,
                 }
                 mongo.db.aggregated_measurements.insert_one(new_measurement)
-                print("New measurement inserted:", new_measurement)
+                #print("New measurement inserted:", new_measurement)
             return True
         except Exception as e:
             # Handle the error (e.g., log it, re-raise it, etc.)
@@ -147,19 +147,27 @@ class MeasurementRepository:
             # Execute the query
             results = mongo.db.aggregated_measurements.find(query)
 
+            to_return = []
+
             #convert the geohash to its central coordinates
             for result in results:
-                geohash = result['geohash']
+                #print("Result before geohash decoding:", result)
+                
                 # Decode the geohash to get the coordinates
-                lat, lon = Geohash.decode(geohash)
-                # Add the coordinates to the result
-                result['location'] = {
-                    'type': 'Point',
-                    'coordinates': [lon, lat]
+                lat, lon, _, _ = Geohash.decode_exactly(result['geohash'])
+                # Create a new dictionary with the decoded coordinates
+                decoded_result = {
+                    'intensity': result['average'],
+                    'lat' : lat,
+                    'lon' : lon
                 }
+                to_return.append(decoded_result)
+
+
+
 
             # Convert the results to a list of dictionaries
-            return [result for result in results]
+            return to_return
 
         except Exception as e:
             print(f"Error retrieving aggregated measurements: {e}")
