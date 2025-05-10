@@ -1,66 +1,110 @@
 package it.dii.unipi.myapplication.model
 
-import android.provider.MediaStore.Audio
+import android.content.Context
+import android.location.Location
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
+import android.util.Log
 import it.dii.unipi.myapplication.app.Config
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MediaType.Companion.toMediaType
+import org.json.JSONArray
 import org.json.JSONObject
-import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.Locale
 import java.util.Date
+import java.util.Locale
+import kotlin.math.log10
+import kotlin.math.sqrt
 
-/**
- * Repository to handle data sending.
- */
-class DataSender {
-    private val client = OkHttpClient()
+class DataSender(
+  private val context: Context,
+) {
+  companion object {
+    private const val TAG = "DataSender"
+    private const val SAMPLE_RATE = 44_100
+    private const val JSON_TYPE = "application/json; charset=utf-8"
+    private const val MIN_RMS = 1e-8
+  }
 
-    fun sendAudioData(
-        username: String,
-        audioData: FloatArray,
-        latitude: Double,
-        longitude: Double,
-        duration: Int
-    ): AudioResult {
-        val json = JSONObject()
-            .put("username", username)
-            .put("audio_data", audioData)
-            .put("latitude", latitude)
-            .put("longitude", longitude)
-            .put("duration", duration)
-            .put("timestamp", SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(Date()))
-            .toString()
+  private val client = OkHttpClient()
+  private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+  private val username = SessionManager(context).getUsernameFromSession()
 
-        val requestBody = json.toRequestBody("application/json".toMediaType())
+  private var sumSquares = 0.0
+  private var sampleCount = 0
 
-        val request = Request.Builder()
-            .url("${Config.BASE_URL}/upload")
-            .post(requestBody)
-            .addHeader("Content-Type", "application/json")
-            .build()
+ 
 
-        return try {
-            val response = client.newCall(request).execute()
-            if (response.isSuccessful) {
-                val cookie = response.header("Set-Cookie")
-                if (cookie != null) {
-                    AudioResult.Success(cookie)
-                } else {
-                    AudioResult.Error("Cookie not found in response")
-                }
-            } else {
-                AudioResult.Error("Error: ${response.code}")
-            }
-        } catch (e: IOException) {
-            AudioResult.Error("Network Error: ${e.message}")
-        }
+  public fun processBuffer(buffer: FloatArray) {
+    var offset = 0
+    while (offset < buffer.size) {
+      val remain = SAMPLE_RATE - sampleCount
+      val chunk = minOf(buffer.size - offset, remain)
+      for (i in 0 until chunk) {
+        val v = buffer[offset + i]
+        sumSquares += v * v
+        sampleCount++
+      }
+      offset += chunk
+      if (sampleCount >= SAMPLE_RATE) {
+        val rms = sqrt(sumSquares / SAMPLE_RATE)
+        val db = 20 * log10(maxOf(rms, MIN_RMS))
+        val durationSec = sampleCount.toDouble() / SAMPLE_RATE
+        sendToServer(db.toFloat(), durationSec)
+        sumSquares = 0.0
+        sampleCount = 0
+      }
     }
-}
+  }
 
-sealed class AudioResult {
-    data class Success(val cookie: String) : AudioResult()
-    data class Error(val message: String) : AudioResult()
+  private fun sendToServer(noiseLevel: Float, durationSec: Double) {
+    // Directly call LocationHelper without suspend
+    LocationHelper(context).getCurrentLocation { location ->
+      if (location == null) {
+        Log.e(TAG, "sendToServer: Location is null. Cannot send data.") // New log
+        return@getCurrentLocation
+      }
+      // Prepare and send HTTP request asynchronously on an IO-optimized dispatcher
+      CoroutineScope(Dispatchers.IO).launch { // Explicitly use Dispatchers.IO for network
+        try {
+          val json = JSONObject().apply {
+            put("user_id", username)
+            put("noise_level", noiseLevel)
+            put("duration", durationSec)
+            put("timestamp", dateFormat.format(Date()))
+            put("location", JSONObject().apply {
+              put("type", "Point")
+              put("coordinates", JSONArray().apply {
+                put(location.longitude)
+                put(location.latitude)
+              })
+            })
+          }
+          val body = json.toString().toRequestBody(JSON_TYPE.toMediaType())
+          val request = Request.Builder()
+            .url(Config.BASE_URL + "/measurements")
+            .post(body)
+            .build()
+          client.newCall(request).execute().use { resp ->
+            val responseBodyString = resp.body?.string() // Read body once
+            if (resp.isSuccessful) {
+            } else {
+              Log.e(TAG, "Error sending data: Code ${resp.code}, Message: ${resp.message}, Response: $responseBodyString") // More detailed error
+            }
+          }
+        } catch (e: Exception) {
+          Log.e(TAG, "sendToServer: Exception during network operation", e) // More specific exception log
+        }
+      }
+    }
+  }
 }

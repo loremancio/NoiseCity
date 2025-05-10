@@ -46,12 +46,12 @@ class UserRepository:
 
 class MeasurementRepository:
     @staticmethod
-    def process_measurement(user_id, timestamp, noise_level, location):
+    def process_measurement(user_id, timestamp, noise_level, location, duration):
         # validazioni invariate…
         geohash = Geohash.encode(location['coordinates'][1],
                                 location['coordinates'][0],
                                 precision=7)
-
+        
         # Inserisci il raw
         raw_doc = {
             'user_id': user_id,
@@ -59,6 +59,7 @@ class MeasurementRepository:
             'noise_level': noise_level,
             'location': location,
             'geohash': geohash,
+            'duration': duration,
         }
         mongo.db.raw_measurements.insert_one(raw_doc)
 

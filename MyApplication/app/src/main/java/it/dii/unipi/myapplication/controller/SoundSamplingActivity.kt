@@ -27,10 +27,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import java.time.Instant
+import kotlin.math.log10
+import kotlin.math.sqrt
+
+
 
 
 class SoundSamplingActivity : AppCompatActivity() {
@@ -104,7 +107,7 @@ class SoundSamplingActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("MissingPermission") // since we've already checked it above
+    @SuppressLint("MissingPermission")
     private fun startRecording() {
         Log.d(TAG, "startRecording: Avvio registrazione")
         // ensure we don't start twice
@@ -167,37 +170,8 @@ class SoundSamplingActivity : AppCompatActivity() {
             }
         }
     }
-
+    
     private fun stopRecording() {
-        /*val locationHelper = LocationHelper(this)
-        locationHelper.getCurrentLocation { location ->
-            if (location != null) {
-                Log.d(TAG, "stopRecording: Current location: $location")
-                val latitude = location.latitude
-                val longitude = location.longitude
-
-                val audioData = audioSample?:run {
-                    Log.e(TAG, "stopRecording: Audio data is null")
-                    return@getCurrentLocation
-                }
-
-                val duration = calculateAudioDuration(audioData)
-                val sessionHelper = SessionManager(this)
-                val username = sessionHelper.getUsernameFromSession()
-
-                val dataSender = DataSender()
-                dataSender.sendAudioData(
-                    username = username,
-                    audioData = audioData,
-                    latitude = latitude,
-                    longitude = longitude,
-                    duration = duration
-                )
-            } else {
-                Log.e(TAG, "stopRecording: Unable to get current location")
-                Toast.makeText(this, "Unable to get current location", Toast.LENGTH_SHORT).show()
-            }
-        }*/
 
         Log.d(TAG, "stopRecording: Arresto registrazione")
         recordingJob?.cancel()
@@ -211,39 +185,6 @@ class SoundSamplingActivity : AppCompatActivity() {
             }
         }
         audioRecord = null
-
-        // Invia il JSON al server
-        val json = JSONObject().apply {
-            put("message", "ciao")
-        }
-        val requestBody = json.toString().toRequestBody("application/json".toMediaType())
-
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("http://192.168.117.250:5000/upload") // Sostituisci <server-url> con l'URL del tuo server
-            .post(requestBody)
-            .build()
-
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                Log.d(TAG, "stopRecording: Invio richiesta al server")
-                val response = client.newCall(request).execute()
-                withContext(Dispatchers.Main) {
-                    if (response.isSuccessful) {
-                        Log.d(TAG, "stopRecording: JSON inviato con successo")
-                        Toast.makeText(this@SoundSamplingActivity, "Dati inviati con successo", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Log.e(TAG, "stopRecording: Errore durante l'invio dei dati - ${response.code}")
-                        Toast.makeText(this@SoundSamplingActivity, "Errore durante l'invio dei dati", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "stopRecording: Eccezione durante l'invio dei dati", e)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@SoundSamplingActivity, "Errore di connessione", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
     }
 
     override fun onDestroy() {
@@ -252,9 +193,4 @@ class SoundSamplingActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    fun calculateAudioDuration(audioData: FloatArray, sampleRate: Int = 44100, channelCount: Int = 1): Int {
-        val bytesPerSample = 2 // PCM 16-bit
-        val totalSamples = audioData.size / (bytesPerSample * channelCount)
-        return totalSamples / sampleRate // Durata in secondi
-    }
 }

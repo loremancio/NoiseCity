@@ -20,7 +20,7 @@ class SoundController(private val context: Context) {
         private const val TAG = "SoundController"
     }
 
-    private val audioRecorder = AudioRecorder()
+    private val audioRecorder = AudioRecorder(context)
     private var audioSampleListener: ((AudioSample) -> Unit)? = null
     
     init {
@@ -53,7 +53,7 @@ class SoundController(private val context: Context) {
     
     fun stopRecording() {
         Log.d(TAG, "Stopping recording")
-        audioRecorder.stopRecording(context)
+        audioRecorder.stopRecording()
     }
     
     fun isRecording(): Boolean {
