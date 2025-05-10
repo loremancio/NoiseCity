@@ -23,6 +23,7 @@ android {
             localProperties.load(it)
         }
     }
+    val backendUrl = localProperties.getProperty("BACKEND_URL") ?: ""
 
     defaultConfig {
         applicationId = "it.dii.unipi.myapplication"
@@ -31,7 +32,6 @@ android {
         versionCode   = 1
         versionName   = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
@@ -45,11 +45,13 @@ android {
         getByName("debug") {
             val googleMapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
             resValue("string", "google_maps_key", googleMapsApiKey)
+            buildConfigField("String", "BACKEND_URL", "\"$backendUrl\"")
         }
 
         getByName("release") {
             val googleMapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
             resValue("string", "google_maps_key", googleMapsApiKey)
+            buildConfigField("String", "BACKEND_URL", "\"$backendUrl\"")
         }
     }
 

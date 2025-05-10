@@ -8,6 +8,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import java.io.IOException
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 class HeatmapRepository {
     private val client = OkHttpClient()
@@ -18,20 +20,30 @@ class HeatmapRepository {
      * @param latitude center of the area
      * @param longitude center of the area
      * @param radiusKm radius in km
+     * @param startMillis start timestamp in milliseconds
+     * @param endMillis end timestamp in milliseconds
      */
     @Throws(IOException::class)
     suspend fun fetchHeatmap(
         latitude: Double,
         longitude: Double,
-        radiusKm: Int = 5
+        radiusKm: Int = 5,
+        startTimeMillis: Long,
+        endTimeMillis: Long
     ): List<WeightedLatLng> {
         val baseUrl = "${Config.BASE_URL}/measurements"
+        val startIso: String = DateTimeFormatter.ISO_INSTANT
+            .format(Instant.ofEpochMilli(startTimeMillis))
+        val endIso: String = DateTimeFormatter.ISO_INSTANT
+            .format(Instant.ofEpochMilli(endTimeMillis))
         val httpUrl = baseUrl
             .toHttpUrlOrNull()
             ?.newBuilder()
             ?.addQueryParameter("latitude", latitude.toString())
             ?.addQueryParameter("longitude", longitude.toString())
             ?.addQueryParameter("radius_km", radiusKm.toString())
+            ?.addQueryParameter("start_timestamp",startIso)
+            ?.addQueryParameter("end_timestamp", endIso)
             ?.build()
             ?: throw IOException("Invalid URL: $baseUrl")
 

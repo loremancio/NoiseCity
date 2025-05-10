@@ -1,5 +1,6 @@
 package it.dii.unipi.myapplication.model
 
+import android.widget.Toast
 import it.dii.unipi.myapplication.app.Config
 import okhttp3.OkHttpClient
 import okhttp3.Request
