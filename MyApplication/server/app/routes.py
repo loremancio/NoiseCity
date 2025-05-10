@@ -48,6 +48,7 @@ def profile():
 
 @bp.route('/measurements', methods=['POST'])
 #@login_requireddef add_measurement():
+def add_measurement():
     try:
         data = request.get_json()
 
