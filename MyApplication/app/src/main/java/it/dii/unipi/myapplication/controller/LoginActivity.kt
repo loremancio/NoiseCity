@@ -73,10 +73,8 @@ class LoginActivity : AppCompatActivity() {
                     is LoginResult.Success -> {
                         val sessionManager = SessionManager(this@LoginActivity)
                         sessionManager.saveUsernameToSession(username)
+                        sessionManager.saveCookieToSession(result.cookie)
 
-                        MaterialAlertDialogBuilder(this@LoginActivity)
-                            .setTitle("Login Success!")
-                            .show()
                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
                         startActivity(intent)
                         finish()

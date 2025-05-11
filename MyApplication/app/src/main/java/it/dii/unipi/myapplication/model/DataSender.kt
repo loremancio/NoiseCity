@@ -38,13 +38,12 @@ class DataSender(
   private val client = OkHttpClient()
   private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
   private val username = SessionManager(context).getUsernameFromSession()
+  private val cookie = SessionManager(context).getCookieFromSession()
 
   private var sumSquares = 0.0
   private var sampleCount = 0
 
- 
-
-  public fun processBuffer(buffer: FloatArray) {
+  fun processBuffer(buffer: FloatArray) {
     var offset = 0
     while (offset < buffer.size) {
       val remain = SAMPLE_RATE - sampleCount
@@ -70,7 +69,7 @@ class DataSender(
     // Directly call LocationHelper without suspend
     LocationHelper(context).getCurrentLocation { location ->
       if (location == null) {
-        Log.e(TAG, "sendToServer: Location is null. Cannot send data.") // New log
+        Log.e(TAG, "sendToServer: Location is null. Cannot send data.")
         return@getCurrentLocation
       }
       // Prepare and send HTTP request asynchronously on an IO-optimized dispatcher
@@ -93,16 +92,17 @@ class DataSender(
           val request = Request.Builder()
             .url(Config.BASE_URL + "/measurements")
             .post(body)
+            .addHeader("Cookie", cookie)
             .build()
           client.newCall(request).execute().use { resp ->
-            val responseBodyString = resp.body?.string() // Read body once
+            val responseBodyString = resp.body?.string()
             if (resp.isSuccessful) {
             } else {
               Log.e(TAG, "Error sending data: Code ${resp.code}, Message: ${resp.message}, Response: $responseBodyString") // More detailed error
             }
           }
         } catch (e: Exception) {
-          Log.e(TAG, "sendToServer: Exception during network operation", e) // More specific exception log
+          Log.e(TAG, "sendToServer: Exception during network operation", e)
         }
       }
     }
