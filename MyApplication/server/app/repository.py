@@ -3,6 +3,12 @@ from app.models import User
 from bson import ObjectId
 from app.extensions import bcrypt
 import geohash2 as Geohash
+import reverse_geocode
+
+
+ACH_THRESHOLD_MEASUREMENTS = 5
+ACH_THRESHOLD_CITIES = 2
+ACH_THRESHOLD_COUNTRIES = 2
 
 class UserRepository:
     @staticmethod
@@ -42,6 +48,19 @@ class UserRepository:
         if user and bcrypt.check_password_hash(user.password_hash, password):
             return user
         return None
+
+    @staticmethod
+    def incrementCount(user_id):
+        try:
+            updated_user = mongo.db.users.find_one_and_update(
+                {'_id': ObjectId(user_id)},
+                {'$inc': {'count': 1}},
+                return_document=ReturnDocument.AFTER
+            )
+            return updated_user['count'] if updated_user else None
+        except Exception as e:
+            print(f"Error incrementing count: {e}")
+            return None 
 
 
 class MeasurementRepository:
@@ -88,12 +107,21 @@ class MeasurementRepository:
                 },
                 upsert=True
             )
-            return True
 
         except Exception as e:
             # rollback raw insertion
             mongo.db.raw_measurements.delete_one({'_id': raw_doc['_id']})
             raise
+
+        # check for achievements
+        json_achievements = {}
+
+        # 1)Number of measurements
+        if UserRepository.incrementCount(user_id) == ACH_THRESHOLD_MEASUREMENTS:
+            json_achievements['measurements'] = {
+                'title': 'Measurement Master',
+                'description': f'You have made {ACH_THRESHOLD_MEASUREMENTS} measurements'
+            }
 
 
     @staticmethod
