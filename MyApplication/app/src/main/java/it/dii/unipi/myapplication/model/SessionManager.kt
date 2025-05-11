@@ -2,16 +2,29 @@ package it.dii.unipi.myapplication.model
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
 class SessionManager(context: Context) {
     private val preferences: SharedPreferences =
         context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
 
+    fun getCookieFromSession(): String {
+        return preferences.getString("cookie", "Unknown") ?: "Unknown"
+    }
+
     fun getUsernameFromSession(): String {
         return preferences.getString("username", "Unknown") ?: "Unknown"
     }
 
-    fun saveUsernameToSession(username: String) {
-        preferences.edit().putString("username", username).apply()
+    fun saveCookieToSession(cookie: String) {
+        preferences.edit { putString("cookie", cookie) }
+    }
+
+    fun saveUsernameToSession(cookie: String) {
+        preferences.edit { putString("cookie", cookie) }
+    }
+
+    fun isLoggedIn(): Boolean {
+        return preferences.getString("cookie", null) != null
     }
 }

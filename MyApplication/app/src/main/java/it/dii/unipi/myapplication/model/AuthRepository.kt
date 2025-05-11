@@ -1,6 +1,5 @@
 package it.dii.unipi.myapplication.model
 
-import android.widget.Toast
 import it.dii.unipi.myapplication.app.Config
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,7 +19,7 @@ class AuthRepository {
      * Try to login with the given username and password.
      * @return LoginResult.Success(cookie) if all right, LoginResult.Error(msg) if something goes wrong.
      */
-    suspend fun login(username: String, password: String): LoginResult {
+    fun login(username: String, password: String): LoginResult {
         val json = JSONObject()
             .put("username", username)
             .put("password", password)
@@ -55,7 +54,7 @@ class AuthRepository {
      * Try to register a new user with the given username and password.
      * @return RegistrationResult.Success(msg) if registration is successful, RegistrationResult.Error(msg) if something goes wrong.
      */
-    suspend fun register(username: String, password: String): RegistrationResult {
+    fun register(username: String, password: String): RegistrationResult {
         val json = JSONObject()
             .put("username", username)
             .put("password", password)

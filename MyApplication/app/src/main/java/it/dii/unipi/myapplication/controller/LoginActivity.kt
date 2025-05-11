@@ -28,6 +28,15 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // check if the user is already logged in, in this case redirect to MainActivity
+        val sessionManager = SessionManager(this@LoginActivity)
+        if (sessionManager.isLoggedIn()) {
+            val intent = Intent(this@LoginActivity, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
         setContentView(R.layout.activity_login)
 
         val usernameField = findViewById<EditText>(R.id.etUsername)
@@ -73,10 +82,8 @@ class LoginActivity : AppCompatActivity() {
                     is LoginResult.Success -> {
                         val sessionManager = SessionManager(this@LoginActivity)
                         sessionManager.saveUsernameToSession(username)
+                        sessionManager.saveCookieToSession(result.cookie)
 
-                        MaterialAlertDialogBuilder(this@LoginActivity)
-                            .setTitle("Login Success!")
-                            .show()
                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
                         startActivity(intent)
                         finish()

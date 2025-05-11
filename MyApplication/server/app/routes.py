@@ -19,10 +19,9 @@ def register():
     password = data.get('password')
     if not username or not password:
         return jsonify({'error': 'Username and password required'}), 400
-    user, error = UserRepository.register(username, password)
+    _, error = UserRepository.register(username, password)
     if error:
         return jsonify({'error': error}), 409
-    login_user(user)
     return jsonify({'message': 'Registration successful'})
 
 @bp.route('/login', methods=['POST'])
@@ -56,7 +55,7 @@ def upload():
     return jsonify({'message': 'Audio data received successfully'})
 
 @bp.route('/measurements', methods=['POST'])
-#@login_requireddef add_measurement():
+@login_required
 def add_measurement():
     try:
         data = request.get_json()
@@ -99,8 +98,8 @@ def add_measurement():
         return jsonify({"error": str(e)}), 500
 
 
-
 @bp.route('/measurements', methods=['GET'])
+@login_required
 def get_measurements():
     try:
         latitude = request.args.get('latitude', type=float)
