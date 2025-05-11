@@ -91,7 +91,7 @@ def add_measurement():
         )
 
         if result:
-            return jsonify({"message": "Measurement added successfully"}), 201
+            return jsonify(result), 201
         else:
             return jsonify({"error": "Failed to add measurement"}), 500
 

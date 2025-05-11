@@ -4,6 +4,7 @@ from bson import ObjectId
 from app.extensions import bcrypt
 import geohash2 as Geohash
 import reverse_geocode
+#from pymongo import ReturnDocument
 
 
 ACH_THRESHOLD_MEASUREMENTS = 5
@@ -50,18 +51,28 @@ class UserRepository:
         return None
 
     @staticmethod
-    def incrementCount(user_id):
+    def incrementCount(username):
         try:
             updated_user = mongo.db.users.find_one_and_update(
-                {'_id': ObjectId(user_id)},
-                {'$inc': {'count': 1}},
-                return_document=ReturnDocument.AFTER
-            )
+                {'username': username},
+                {'$inc': {'count': 1}}
+                )
             return updated_user['count'] if updated_user else None
         except Exception as e:
             print(f"Error incrementing count: {e}")
-            return None 
+            return None
 
+    @staticmethod
+    def get_user_counter(username):
+        """
+        Get the count variable for the user
+        :return: int, the count variable
+        """
+
+        user = UserRepository.get_by_username(username)
+        if user:
+            return user.count
+        return None
 
 class MeasurementRepository:
     @staticmethod
@@ -117,11 +128,72 @@ class MeasurementRepository:
         json_achievements = {}
 
         # 1)Number of measurements
-        if UserRepository.incrementCount(user_id) == ACH_THRESHOLD_MEASUREMENTS:
+        UserRepository.incrementCount(user_id)
+        count = UserRepository.get_user_counter(user_id)
+        if count == ACH_THRESHOLD_MEASUREMENTS:
             json_achievements['measurements'] = {
                 'title': 'Measurement Master',
                 'description': f'You have made {ACH_THRESHOLD_MEASUREMENTS} measurements'
             }
+
+        # 2)Number of cities
+        info = reverse_geocode.get(location['coordinates'][::-1])
+        
+        count = mongo.db.user_cities.count_documents({ "user_id": user_id })
+
+        now = timestamp.replace(tzinfo=None)
+
+        try:
+            mongo.db.user_cities.update_one(
+                { "user_id": user_id, "city": info['city'] },
+                {
+                    "$inc": { "visit_count": 1 },
+                    "$setOnInsert": {
+                        "country": info['country'],
+                        "first_visit": now
+                    },
+                    "$set": { "last_visit": now }
+                },
+                upsert=True
+            )
+        except Exception as e:
+            # rollback raw insertion
+            print(f"Error: {e}")
+
+
+        try:
+            if count+1 == ACH_THRESHOLD_CITIES:
+                json_achievements['cities'] = {
+                    'title': 'City Explorer',
+                    'description': f'You have visited {ACH_THRESHOLD_CITIES} cities'
+                }
+        except Exception as e:
+            # rollback raw insertion
+            print(f"Error: {e}")
+
+        # 3)Number of countries
+
+        count = mongo.db.user_countries.count_documents({ "user_id": user_id })
+
+        mongo.db.user_countries.update_one(
+            { "user_id": user_id, "country": info['country'] },
+            {
+                "$inc": { "visit_count": 1 },
+                "$setOnInsert": {
+                    "first_visit": now
+                },
+                "$set": { "last_visit": now }
+            },
+            upsert=True
+        )
+        if count+1 == ACH_THRESHOLD_COUNTRIES:
+            json_achievements['countries'] = {
+                'title': 'World Traveler',
+                'description': f'You have visited {ACH_THRESHOLD_COUNTRIES} countries'
+            }
+
+        return json_achievements or True
+
 
 
     @staticmethod
