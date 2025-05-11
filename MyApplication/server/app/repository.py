@@ -74,6 +74,24 @@ class UserRepository:
             return user.count
         return None
 
+    @staticmethod
+    def add_achievement(user_id, achievement):
+        """
+        Add an achievement to the user
+        :param user_id: str, the user id
+        :param achievement: dict, the achievement to add
+        :return: bool, True if success, False otherwise
+        """
+        try:
+            mongo.db.users.update_one(
+                {'_id': ObjectId(user_id)},
+                {'$addToSet': {'achievements': achievement}}
+            )
+            return True
+        except Exception as e:
+            print(f"Error adding achievement: {e}")
+            return False
+
 class MeasurementRepository:
     @staticmethod
     def process_measurement(user_id, timestamp, noise_level, location, duration):
@@ -135,6 +153,7 @@ class MeasurementRepository:
                 'title': 'Measurement Master',
                 'description': f'You have made {ACH_THRESHOLD_MEASUREMENTS} measurements'
             }
+            UserRepository.add_achievement(user_id, json_achievements['measurements'])
 
         # 2)Number of cities
         info = reverse_geocode.get(location['coordinates'][::-1])
@@ -167,6 +186,7 @@ class MeasurementRepository:
                     'title': 'City Explorer',
                     'description': f'You have visited {ACH_THRESHOLD_CITIES} cities'
                 }
+                UserRepository.add_achievement(user_id, json_achievements['cities'])
         except Exception as e:
             # rollback raw insertion
             print(f"Error: {e}")
@@ -191,6 +211,7 @@ class MeasurementRepository:
                 'title': 'World Traveler',
                 'description': f'You have visited {ACH_THRESHOLD_COUNTRIES} countries'
             }
+            UserRepository.add_achievement(user_id, json_achievements['countries'])
 
         return json_achievements or True
 
