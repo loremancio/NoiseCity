@@ -8,6 +8,7 @@ class User(UserMixin):
         self.username = user_data['username']
         self.password_hash = user_data['password']
         self.count = user_data.get('count', 0)
+        self.achievements = user_data.get('achievements', [])
 
     @staticmethod
     def from_mongo(user_data):

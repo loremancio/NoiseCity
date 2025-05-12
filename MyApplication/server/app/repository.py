@@ -78,13 +78,13 @@ class UserRepository:
     def add_achievement(user_id, achievement):
         """
         Add an achievement to the user
-        :param user_id: str, the user id
+        :param user_id: str, username
         :param achievement: dict, the achievement to add
         :return: bool, True if success, False otherwise
         """
         try:
             mongo.db.users.update_one(
-                {'_id': ObjectId(user_id)},
+                {'username': user_id},
                 {'$addToSet': {'achievements': achievement}}
             )
             return True
@@ -158,10 +158,10 @@ class MeasurementRepository:
         # 2)Number of cities
         info = reverse_geocode.get(location['coordinates'][::-1])
         
-        count = mongo.db.user_cities.count_documents({ "user_id": user_id })
 
         now = timestamp.replace(tzinfo=None)
 
+        old_count = mongo.db.user_cities.count_documents({ "user_id": user_id })
         try:
             mongo.db.user_cities.update_one(
                 { "user_id": user_id, "city": info['city'] },
@@ -179,9 +179,10 @@ class MeasurementRepository:
             # rollback raw insertion
             print(f"Error: {e}")
 
+        count = mongo.db.user_cities.count_documents({ "user_id": user_id })
 
         try:
-            if count+1 == ACH_THRESHOLD_CITIES:
+            if count == ACH_THRESHOLD_CITIES and old_count != count:
                 json_achievements['cities'] = {
                     'title': 'City Explorer',
                     'description': f'You have visited {ACH_THRESHOLD_CITIES} cities'
@@ -193,7 +194,9 @@ class MeasurementRepository:
 
         # 3)Number of countries
 
-        count = mongo.db.user_countries.count_documents({ "user_id": user_id })
+
+
+        old_count = mongo.db.user_countries.count_documents({ "user_id": user_id })
 
         mongo.db.user_countries.update_one(
             { "user_id": user_id, "country": info['country'] },
@@ -206,7 +209,9 @@ class MeasurementRepository:
             },
             upsert=True
         )
-        if count+1 == ACH_THRESHOLD_COUNTRIES:
+        count = mongo.db.user_countries.count_documents({ "user_id": user_id })
+
+        if count == ACH_THRESHOLD_COUNTRIES and old_count != count:
             json_achievements['countries'] = {
                 'title': 'World Traveler',
                 'description': f'You have visited {ACH_THRESHOLD_COUNTRIES} countries'

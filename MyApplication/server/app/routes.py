@@ -42,10 +42,37 @@ def logout():
     logout_user()
     return jsonify({'message': 'Logout successful'})
 
-@bp.route('/profile')
-@login_required
+@bp.route('/profile', methods=['GET'])
+#@login_required
 def profile():
-    return jsonify({'username': current_user.username})
+    """
+    this method should return the user profile, including the username and their achievements
+    """
+    username = request.args.get('username')
+
+    print(f"Received username: {username}")
+
+    if username:
+        user = UserRepository.get_by_username(username)
+        if user:
+            return jsonify({
+                'username': user.username,
+                'achievements': user.achievements
+            })
+        else:
+            return jsonify({'error': 'User not found'}), 404
+    else:
+        # If no username is provided, return the current user's profile
+        user = UserRepository.get_by_id(current_user.id)
+        if user:
+            return jsonify({
+                'username': user.username,
+                'achievements': user.achievements
+            })
+        else:
+            # If the user is not found in the database, return an error
+            log.error(f"User with ID {current_user.id} not found")
+    return jsonify({'error': 'User not found'}), 404
 
 @bp.route('/upload', methods=['POST'])
 def upload():
@@ -89,6 +116,8 @@ def add_measurement():
             measurement["location"],
             measurement["duration"]
         )
+
+        print(f"Result of measurement processing: {result}")
 
         if result:
             return jsonify(result), 201
