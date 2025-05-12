@@ -8,4 +8,8 @@
         android:id="@+id/mapFragment"
         android:icon="@drawable/ic_map_activity"
         android:title="HeatMap" />
+    <item
+        android:id="@+id/userFragment"
+        android:icon="@drawable/ic_user"
+        android:title="Your Profile" />
 </menu>
