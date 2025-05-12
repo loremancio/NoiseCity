@@ -144,3 +144,50 @@ def get_measurements():
     except Exception as e:
         # Log the error server‐side as needed
         return jsonify({"error": "Server error", "details": str(e)}), 500
+
+
+@bp.route('/user_summary', methods=['GET'])
+# @login_required
+def user_summary():
+    try:
+        username = "lore"
+        achievements = [
+            {
+                "title": "City Explorer",
+                "description": "You have visited 2 cities"
+            },
+            {
+                "title": "World Traveler",
+                "description": "You have visited 2 countries"
+            },
+            {
+                "title": "Measurement Master",
+                "description": "You have made 5 measurements"
+            }
+        ]
+
+        return jsonify({
+            "username": username,
+            "achievements": achievements
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@bp.route('/achievements_reached', methods=['GET'])
+# @login_required
+def achievements_reached():
+    try:
+        # Simulate fetching achievements from the database
+        achievements = [
+            {
+                "title": "World Traveler",
+                "description": "You have visited 2 countries"
+            }
+        ]
+
+        return jsonify(achievements), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
