@@ -48,9 +48,7 @@ def profile():
     """
     this method should return the user profile, including the username and their achievements
     """
-    username = request.args.get('username')
-
-    print(f"Received username: {username}")
+    username = current_user.username if current_user.is_authenticated else request.args.get('username')
 
     if username:
         user = UserRepository.get_by_username(username)
@@ -85,6 +83,8 @@ def upload():
 @bp.route('/measurements', methods=['POST'])
 #@login_requireddef add_measurement():
 def add_measurement():
+
+    print("Received data", request)
     try:
         data = request.get_json()
 

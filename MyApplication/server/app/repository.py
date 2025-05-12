@@ -10,7 +10,7 @@ from datetime import datetime # Import datetime for explicit type handling
 
 # Achievement thresholds
 ACH_THRESHOLD_MEASUREMENTS = 5
-ACH_THRESHOLD_CITIES = 2
+ACH_THRESHOLD_CITIES = 4
 ACH_THRESHOLD_COUNTRIES = 2
 
 class UserRepository:
@@ -162,7 +162,7 @@ class MeasurementRepository:
         time_bucket = timestamp.replace(minute=0, second=0, microsecond=0)
 
         # Dictionary to collect earned achievements
-        earned_achievements = {}
+        earned_achievements = {'achievements': []}
 
         try:
             # --- Step 2: Insert the raw measurement
@@ -226,7 +226,7 @@ class MeasurementRepository:
                     'description': f'You have made {ACH_THRESHOLD_MEASUREMENTS} measurements'
                 }
                 if UserRepository.add_achievement(user_id, achievement_data):
-                     earned_achievements['measurements'] = achievement_data
+                     earned_achievements['achievements'].append(achievement_data)
                      print(f"User {user_id} earned 'Measurement Master' achievement.")
                 else:
                      print(f"Failed to add 'Measurement Master' achievement for user {user_id}.")
@@ -267,7 +267,7 @@ class MeasurementRepository:
                         'description': f'You have visited {ACH_THRESHOLD_CITIES} cities'
                     }
                     if UserRepository.add_achievement(user_id, achievement_data):
-                        earned_achievements['cities'] = achievement_data
+                        earned_achievements['achievements'].append(achievement_data)
                         print(f"User {user_id} earned 'City Explorer' achievement.")
                     else:
                         print(f"Failed to add 'City Explorer' achievement for user {user_id}.")
@@ -307,7 +307,7 @@ class MeasurementRepository:
                         'description': f'You have visited {ACH_THRESHOLD_COUNTRIES} countries'
                     }
                      if UserRepository.add_achievement(user_id, achievement_data):
-                        earned_achievements['countries'] = achievement_data
+                        earned_achievements['achievements'].append(achievement_data)
                         print(f"User {user_id} earned 'World Traveler' achievement.")
                      else:
                          print(f"Failed to add 'World Traveler' achievement for user {user_id}.")
