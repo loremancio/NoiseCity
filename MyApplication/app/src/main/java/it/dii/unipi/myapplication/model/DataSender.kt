@@ -5,7 +5,9 @@ import android.location.Location
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import kotlinx.coroutines.withContext
 import android.util.Log
+import android.widget.Toast
 import it.dii.unipi.myapplication.app.Config
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -97,10 +99,34 @@ class DataSender(
           client.newCall(request).execute().use { resp ->
             val responseBodyString = resp.body?.string() // Read body once
             if (resp.isSuccessful) {
+              Log.d(TAG, "sendToServer: Data sent successfully: $responseBodyString") // More detailed success log
             } else {
               Log.e(TAG, "Error sending data: Code ${resp.code}, Message: ${resp.message}, Response: $responseBodyString") // More detailed error
             }
           }
+          val request2 = Request.Builder()
+            .url("${Config.BASE_URL}/achievements_reached")
+            .build()
+
+          client.newCall(request2).execute().use { resp ->
+                if (resp.isSuccessful) {
+                  val responseBodyString = resp.body?.string() ?: throw Exception("Corpo vuoto")// Read body once
+                  Log.d(TAG, "sendToServer: Achievements data received successfully: $responseBodyString") // More detailed success log
+                  val json = JSONArray(responseBodyString)
+                  if (json.length() > 0) {
+                    val ach = json.getJSONObject(0)
+                    val title = ach.getString("title")
+                    val description = ach.getString("description")
+                    withContext(Dispatchers.Main) {
+                      Toast.makeText(context, "$title: $description", Toast.LENGTH_LONG).show()
+                    }
+                  } else {
+                    Log.d(TAG, "No achievements reached") // More detailed log
+                  }
+                } else {
+                    Log.d(TAG, "No receiving achievements data: Code ${resp.code}, Message: ${resp.message}") // More detailed error
+                }
+            }
         } catch (e: Exception) {
           Log.e(TAG, "sendToServer: Exception during network operation", e) // More specific exception log
         }
