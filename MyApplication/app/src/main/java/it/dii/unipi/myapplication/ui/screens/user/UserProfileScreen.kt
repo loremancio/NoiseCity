@@ -25,7 +25,7 @@ class UserProfileScreen : Fragment() {
 
     companion object {
         private const val TAG = "UserProfileScreen"
-        private const val BASE_URL = "http://192.168.207.250:5000/profile" // Sostituisci con il tuo IP reale
+        private const val BASE_URL = Config.BASE_URL+ "/profile" // Sostituisci con il tuo IP reale
     }
 
     data class Achievement(val title: String, val description: String)
@@ -57,6 +57,7 @@ class UserProfileScreen : Fragment() {
         val request = Request.Builder()
             .url(httpUrl)
             .get()
+            .addHeader("Cookie", SessionManager(requireContext()).getCookieFromSession())
             .build()
 
         lifecycleScope.launch {
