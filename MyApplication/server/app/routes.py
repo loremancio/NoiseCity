@@ -43,7 +43,7 @@ def logout():
     return jsonify({'message': 'Logout successful'})
 
 @bp.route('/profile', methods=['GET'])
-#@login_required
+@login_required
 def profile():
     """
     this method should return the user profile, including the username and their achievements
@@ -81,7 +81,7 @@ def upload():
     return jsonify({'message': 'Audio data received successfully'})
 
 @bp.route('/measurements', methods=['POST'])
-#@login_requireddef add_measurement():
+@login_required
 def add_measurement():
 
     print("Received data", request)
