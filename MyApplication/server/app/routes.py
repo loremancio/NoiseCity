@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import login_user, logout_user, current_user
 from app.repository import UserRepository, MeasurementRepository
 from app.extensions import login_manager
 from datetime import datetime
@@ -36,13 +36,13 @@ def login():
     return jsonify({'error': 'Invalid credentials'}), 401
 
 @bp.route('/logout')
-@login_required
+@login_manager.user_loader
 def logout():
     logout_user()
     return jsonify({'message': 'Logout successful'})
 
 @bp.route('/profile', methods=['GET'])
-@login_required
+@login_manager.user_loader
 def profile():
     """
     this method should return the user profile, including the username and their achievements
@@ -80,7 +80,7 @@ def upload():
     return jsonify({'message': 'Audio data received successfully'})
 
 @bp.route('/measurements', methods=['POST'])
-@login_required
+@login_manager.user_loader
 def add_measurement():
 
     print("Received data", request)
@@ -128,7 +128,7 @@ def add_measurement():
 
 
 @bp.route('/measurements', methods=['GET'])
-@login_required
+@login_manager.user_loader
 def get_measurements():
     try:
         latitude = request.args.get('latitude', type=float)
