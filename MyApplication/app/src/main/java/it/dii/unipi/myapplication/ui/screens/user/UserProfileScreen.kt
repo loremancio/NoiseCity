@@ -11,9 +11,12 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import it.dii.unipi.myapplication.R
+import it.dii.unipi.myapplication.app.Config
+import it.dii.unipi.myapplication.model.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -22,8 +25,10 @@ class UserProfileScreen : Fragment() {
 
     companion object {
         private const val TAG = "UserProfileScreen"
-        private const val BASE_URL = "http://192.168.64.250:5000/user_summary" // Sostituisci con il tuo IP reale
+        private const val BASE_URL = "http://192.168.153.250:5000/profile" // Sostituisci con il tuo IP reale
     }
+
+    private val cookie = SessionManager(requireContext()).getCookieFromSession()
 
     data class Achievement(val title: String, val description: String)
     data class UserAchievements(val username: String, val achievements: List<Achievement>)
@@ -43,8 +48,17 @@ class UserProfileScreen : Fragment() {
 
     private fun fetchUserSummary(view: View) {
         val client = OkHttpClient()
+        val baseUrl = BASE_URL
+        val httpUrl = baseUrl
+            .toHttpUrlOrNull()
+            ?.newBuilder()
+            ?.addQueryParameter("username", SessionManager(requireContext()).getUsernameFromSession())
+            ?.build()
+            ?: throw Exception("URL non valido: $baseUrl")
+
         val request = Request.Builder()
-            .url(BASE_URL)
+            .url(httpUrl)
+            .get()
             .build()
 
         lifecycleScope.launch {

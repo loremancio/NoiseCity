@@ -97,14 +97,29 @@ class DataSender(
             .addHeader("Cookie", cookie)
             .build()
           client.newCall(request).execute().use { resp ->
-            val responseBodyString = resp.body?.string()
+            val responseBodyString = resp.body?.string() ?: throw Exception("Corpo vuoto") // Read body once
             if (resp.isSuccessful) {
               Log.d(TAG, "sendToServer: Data sent successfully: $responseBodyString") // More detailed success log
+              val jsonResponse = JSONObject(responseBodyString)
+              val achievements = jsonResponse.getJSONArray("achievements")
+
+              if (achievements.length() > 0) {
+               withContext(Dispatchers.Main) {
+                 for (i in 0 until achievements.length()) {
+                   val ach = achievements.getJSONObject(i)
+                   val title = ach.getString("title")
+                   val description = ach.getString("description")
+                   Toast.makeText(context, "You achieved $title: $description", Toast.LENGTH_LONG).show()
+                 }
+               }
+              } else {
+                Log.d(TAG, "No achievements reached") // More detailed log
+              }
             } else {
               Log.e(TAG, "Error sending data: Code ${resp.code}, Message: ${resp.message}, Response: $responseBodyString") // More detailed error
             }
           }
-          val request2 = Request.Builder()
+          /*val request2 = Request.Builder()
             .url("${Config.BASE_URL}/achievements_reached")
             .build()
 
@@ -126,7 +141,7 @@ class DataSender(
                 } else {
                     Log.d(TAG, "No receiving achievements data: Code ${resp.code}, Message: ${resp.message}") // More detailed error
                 }
-            }
+            }*/
         } catch (e: Exception) {
           Log.e(TAG, "sendToServer: Exception during network operation", e)
         }
