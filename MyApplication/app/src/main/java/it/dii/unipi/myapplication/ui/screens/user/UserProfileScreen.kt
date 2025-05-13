@@ -25,10 +25,8 @@ class UserProfileScreen : Fragment() {
 
     companion object {
         private const val TAG = "UserProfileScreen"
-        private const val BASE_URL = "http://192.168.153.250:5000/profile" // Sostituisci con il tuo IP reale
+        private const val BASE_URL = "http://192.168.207.250:5000/profile" // Sostituisci con il tuo IP reale
     }
-
-    private val cookie = SessionManager(requireContext()).getCookieFromSession()
 
     data class Achievement(val title: String, val description: String)
     data class UserAchievements(val username: String, val achievements: List<Achievement>)
@@ -82,7 +80,7 @@ class UserProfileScreen : Fragment() {
                 }
 
                 withContext(Dispatchers.Main) {
-                    view.findViewById<TextView>(R.id.tvUserName).text = userAchievements.username
+                    view.findViewById<TextView>(R.id.tvUserName).text = userAchievements.username + "'s Profile"
 
                     val badgeData = listOf(
                         Triple("City Explorer", R.id.iconBadgeCities to R.id.countTextViewCities, R.id.blockBadgeCities),
@@ -94,7 +92,7 @@ class UserProfileScreen : Fragment() {
                         val (iconId, textId) = ids
                         val match = userAchievements.achievements.firstOrNull { it.title == title }
 
-                        val blockLayout = view.findViewById<LinearLayout>(layoutId)
+                        val blockLayout = view.findViewById<androidx.cardview.widget.CardView>(layoutId)
 
                         if (match != null) {
                             view.findViewById<ImageView>(iconId).setImageResource(R.drawable.ic_badge_col)

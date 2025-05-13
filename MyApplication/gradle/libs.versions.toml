@@ -20,8 +20,10 @@ okhttp = "4.9.3"
 playServicesMaps = "19.2.0"
 workRuntimeKtx = "2.10.1"
 playServicesLocation = "21.0.1"
+cardview = "1.0.0"
 
 [libraries]
+androidx-cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "androidMapsUtils" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
