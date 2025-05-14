@@ -1,5 +1,6 @@
 package it.dii.unipi.myapplication.model
 
+import android.content.Context
 import it.dii.unipi.myapplication.app.Config
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.heatmaps.WeightedLatLng
@@ -11,8 +12,9 @@ import java.io.IOException
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 
-class HeatmapRepository {
+class HeatmapRepository(private val context: Context) {
     private val client = OkHttpClient()
+    private val cookie = SessionManager(context).getCookieFromSession()
 
     /**
      * Download the heatmap points.
@@ -24,7 +26,7 @@ class HeatmapRepository {
      * @param endMillis end timestamp in milliseconds
      */
     @Throws(IOException::class)
-    suspend fun fetchHeatmap(
+    fun fetchHeatmap(
         latitude: Double,
         longitude: Double,
         radiusKm: Double = 5.0,
@@ -49,6 +51,7 @@ class HeatmapRepository {
 
         val request = Request.Builder()
             .url(httpUrl)
+            .addHeader("Cookie", cookie)
             .get()
             .build()
 
