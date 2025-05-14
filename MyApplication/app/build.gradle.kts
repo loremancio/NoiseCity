@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.android.maps.utils)
     implementation(libs.play.services.location)
+    implementation('com.github.wendykierp:JTransforms:3.1') // Added JTransforms dependency
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

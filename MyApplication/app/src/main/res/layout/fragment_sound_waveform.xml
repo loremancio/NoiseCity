@@ -12,6 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:layout_marginBottom="8dp" />
+
+    <it.dii.unipi.myapplication.ui.components.WaveformView
+        android:id="@+id/frequencyWaveformView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp" />
 
     <LinearLayout
