@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, current_user
-from app.repository import UserRepository, MeasurementRepository
+from app.repository import UserRepository, MeasurementRepository, RawMeasurementRepository
 from app.extensions import login_manager
 from datetime import datetime
 from app.utils import get_geohashes_within_radius
@@ -52,9 +52,14 @@ def profile():
     if username:
         user = UserRepository.get_by_username(username)
         if user:
+            measurements_high = RawMeasurementRepository.get_high_exposure(username)
+            measurements_low = RawMeasurementRepository.get_low_exposure(username)
+
             return jsonify({
                 'username': user.username,
-                'achievements': user.achievements
+                'achievements': user.achievements,
+                'exposure_high': measurements_high,
+                'exposure_low': measurements_low
             })
         else:
             return jsonify({'error': 'User not found'}), 404
@@ -62,9 +67,13 @@ def profile():
         # If no username is provided, return the current user's profile
         user = UserRepository.get_by_id(current_user.id)
         if user:
+            measurements_high = RawMeasurementRepository.get_high_exposure(username)
+            measurements_low = RawMeasurementRepository.get_low_exposure(username)
             return jsonify({
                 'username': user.username,
-                'achievements': user.achievements
+                'achievements': user.achievements,
+                'exposure_high': measurements_high,
+                'exposure_low': measurements_low
             })
         else:
             # If the user is not found in the database, return an error
@@ -166,6 +175,7 @@ def get_measurements():
             start_ts=start_ts,
             end_ts=end_ts
         )
+        print(f"Measurements: {measurements}")
 
         # 5) Return JSON
         return jsonify(measurements), 200
@@ -173,6 +183,14 @@ def get_measurements():
     except Exception as e:
         # Log the error server‐side as needed
         return jsonify({"error": "Server error", "details": str(e)}), 500
+
+
+@bp.route('/raw_measurements', methods=['GET'])
+def get_raw_measurements_by_user():
+    username = request.args.get('username')
+
+    measurements = RawMeasurementRepository.get_all_by_user_id(username)
+    return jsonify(measurements), 200
 
 
 @bp.route('/user_summary', methods=['GET'])

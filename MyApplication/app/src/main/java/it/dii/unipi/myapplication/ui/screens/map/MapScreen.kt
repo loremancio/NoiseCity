@@ -129,7 +129,7 @@ class MapScreen : Fragment() {
 
                     val provider = HeatmapTileProvider.Builder()
                         .weightedData(weightedData)
-                        .radius(5)
+                        .radius(15)
                         .opacity(0.6)
                         .build()
 

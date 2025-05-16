@@ -382,7 +382,6 @@ class MeasurementRepository:
         }
         pipeline.append(group_stage)
 
-
         # 3) Project Stage: Reshape the output documents and calculate the average intensity
         project_stage = {
             '$project': {
@@ -439,3 +438,52 @@ class RawMeasurementRepository:
         # Insert the document and return the inserted ID
         result = mongo.db.raw_measurements.insert_one(measurement)
         return result.inserted_id
+
+    @staticmethod
+    def get_high_exposure(user_id):
+        """
+        Restituisce tutte le misurazioni raw per uno specifico user_id.
+        :param user_id: str o ObjectId, l'id dell'utente.
+        :return: lista di dict con le misurazioni.
+        """
+        # Se user_id è una stringa, convertila in ObjectId
+        if isinstance(user_id, str):
+            try:
+                user_id = ObjectId(user_id)
+            except Exception:
+                pass  # Se non è un ObjectId valido, lascia così (magari è già username)
+        query = {
+            'user_id': user_id,
+            'noise_level': { '$gt': -20}
+        }
+        pipeline = [
+            { '$match': query },
+            { '$group': { '_id': None, 'total_duration': { '$sum': '$duration' } } }
+        ]
+        result = list(mongo.db.raw_measurements.aggregate(pipeline))
+        return result[0]['total_duration'] if result else 0
+
+    @staticmethod
+    def get_low_exposure(user_id):
+        """
+        Restituisce tutte le misurazioni raw per uno specifico user_id.
+        :param user_id: str o ObjectId, l'id dell'utente.
+        :return: lista di dict con le misurazioni.
+        """
+        # Se user_id è una stringa, convertila in ObjectId
+        if isinstance(user_id, str):
+            try:
+                user_id = ObjectId(user_id)
+            except Exception:
+                pass  # Se non è un ObjectId valido, lascia così (magari è già username)
+        query = {
+            'user_id': user_id,
+            'noise_level': { '$lt': -40}
+        }
+        pipeline = [
+            { '$match': query },
+            { '$group': { '_id': None, 'total_duration': { '$sum': '$duration' } } }
+        ]
+        result = list(mongo.db.raw_measurements.aggregate(pipeline))
+        return result[0]['total_duration'] if result else 0
+      

@@ -29,7 +29,7 @@ class UserProfileScreen : Fragment() {
     }
 
     data class Achievement(val title: String, val description: String)
-    data class UserAchievements(val username: String, val achievements: List<Achievement>)
+    data class UserAchievements(val username: String, val achievements: List<Achievement>, val exposure_high: String, val exposure_low: String)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,6 +70,8 @@ class UserProfileScreen : Fragment() {
                     val json = JSONObject(body)
                     val username = json.getString("username")
                     val achievementsJson = json.getJSONArray("achievements")
+                    val exposure_high = json.getString("exposure_high")
+                    val exposure_low = json.getString("exposure_low")
 
                     val achievements = mutableListOf<Achievement>()
                     for (i in 0 until achievementsJson.length()) {
@@ -77,7 +79,7 @@ class UserProfileScreen : Fragment() {
                         achievements.add(Achievement(a.getString("title"), a.getString("description")))
                     }
 
-                    UserAchievements(username, achievements)
+                    UserAchievements(username, achievements, exposure_high, exposure_low)
                 }
 
                 withContext(Dispatchers.Main) {
@@ -103,6 +105,9 @@ class UserProfileScreen : Fragment() {
                             blockLayout.visibility = View.GONE
                         }
                     }
+
+                    view.findViewById<TextView>(R.id.textExpositionHigh).text = "You have been exposed to high noise for " + userAchievements.exposure_high + " seconds"
+                    view.findViewById<TextView>(R.id.textExpositionLow).text = "You have been exposed to low noise for " + userAchievements.exposure_low + " seconds"
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Errore nella richiesta OkHttp", e)
