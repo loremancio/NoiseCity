@@ -57,6 +57,7 @@ class UserProfileScreen : Fragment() {
         val request = Request.Builder()
             .url(httpUrl)
             .get()
+            .addHeader("Cookie", SessionManager(requireContext()).getCookieFromSession())
             .build()
 
         lifecycleScope.launch {

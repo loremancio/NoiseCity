@@ -382,7 +382,6 @@ class MeasurementRepository:
         }
         pipeline.append(group_stage)
 
-
         # 3) Project Stage: Reshape the output documents and calculate the average intensity
         project_stage = {
             '$project': {
@@ -487,3 +486,4 @@ class RawMeasurementRepository:
         ]
         result = list(mongo.db.raw_measurements.aggregate(pipeline))
         return result[0]['total_duration'] if result else 0
+      
