@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_user, logout_user, login_required, current_user
-from app.repository import UserRepository, MeasurementRepository
+from flask_login import login_user, logout_user, current_user
+from app.repository import UserRepository, MeasurementRepository, RawMeasurementRepository
 from app.extensions import login_manager
 from datetime import datetime
 from app.utils import get_geohashes_within_radius
@@ -36,15 +36,49 @@ def login():
     return jsonify({'error': 'Invalid credentials'}), 401
 
 @bp.route('/logout')
-@login_required
+@login_manager.user_loader
 def logout():
     logout_user()
     return jsonify({'message': 'Logout successful'})
 
-@bp.route('/profile')
-@login_required
+@bp.route('/profile', methods=['GET'])
+@login_manager.user_loader
 def profile():
-    return jsonify({'username': current_user.username})
+    """
+    this method should return the user profile, including the username and their achievements
+    """
+    username = current_user.username if current_user.is_authenticated else request.args.get('username')
+
+    if username:
+        user = UserRepository.get_by_username(username)
+        if user:
+            measurements_high = RawMeasurementRepository.get_high_exposure(username)
+            measurements_low = RawMeasurementRepository.get_low_exposure(username)
+
+            return jsonify({
+                'username': user.username,
+                'achievements': user.achievements,
+                'exposure_high': measurements_high,
+                'exposure_low': measurements_low
+            })
+        else:
+            return jsonify({'error': 'User not found'}), 404
+    else:
+        # If no username is provided, return the current user's profile
+        user = UserRepository.get_by_id(current_user.id)
+        if user:
+            measurements_high = RawMeasurementRepository.get_high_exposure(username)
+            measurements_low = RawMeasurementRepository.get_low_exposure(username)
+            return jsonify({
+                'username': user.username,
+                'achievements': user.achievements,
+                'exposure_high': measurements_high,
+                'exposure_low': measurements_low
+            })
+        else:
+            # If the user is not found in the database, return an error
+            log.error(f"User with ID {current_user.id} not found")
+    return jsonify({'error': 'User not found'}), 404
 
 @bp.route('/upload', methods=['POST'])
 def upload():
@@ -55,8 +89,10 @@ def upload():
     return jsonify({'message': 'Audio data received successfully'})
 
 @bp.route('/measurements', methods=['POST'])
-@login_required
+@login_manager.user_loader
 def add_measurement():
+
+    print("Received data", request)
     try:
         data = request.get_json()
 
@@ -89,8 +125,10 @@ def add_measurement():
             measurement["duration"]
         )
 
+        print(f"Result of measurement processing: {result}")
+
         if result:
-            return jsonify({"message": "Measurement added successfully"}), 201
+            return jsonify(result), 201
         else:
             return jsonify({"error": "Failed to add measurement"}), 500
 
@@ -99,7 +137,7 @@ def add_measurement():
 
 
 @bp.route('/measurements', methods=['GET'])
-@login_required
+@login_manager.user_loader
 def get_measurements():
     try:
         latitude = request.args.get('latitude', type=float)
@@ -137,6 +175,7 @@ def get_measurements():
             start_ts=start_ts,
             end_ts=end_ts
         )
+        print(f"Measurements: {measurements}")
 
         # 5) Return JSON
         return jsonify(measurements), 200
@@ -144,6 +183,14 @@ def get_measurements():
     except Exception as e:
         # Log the error server‐side as needed
         return jsonify({"error": "Server error", "details": str(e)}), 500
+
+
+@bp.route('/raw_measurements', methods=['GET'])
+def get_raw_measurements_by_user():
+    username = request.args.get('username')
+
+    measurements = RawMeasurementRepository.get_all_by_user_id(username)
+    return jsonify(measurements), 200
 
 
 @bp.route('/user_summary', methods=['GET'])
