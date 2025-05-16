@@ -35,7 +35,9 @@ class AudioRecorder (
         private const val SAMPLE_RATE = 44_100
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO
         private const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
+
     }
+
     private val audioSender = DataSender(context)
     private var audioRecord: AudioRecord? = null
     private var recordingJob: Job? = null
@@ -88,7 +90,7 @@ class AudioRecorder (
                             
                             launch(Dispatchers.Default) { 
                                 audioSender.processBuffer(floatBuffer)
-                            }
+                          }
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "Error reading audio", e)

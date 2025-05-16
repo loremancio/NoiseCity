@@ -1,14 +1,18 @@
 package it.dii.unipi.myapplication.ui.screens.sound
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import it.dii.unipi.myapplication.R
 import it.dii.unipi.myapplication.controller.SoundController
+import it.dii.unipi.myapplication.database.CompensationDatabaseHelper
 import it.dii.unipi.myapplication.model.AudioSample
 import it.dii.unipi.myapplication.ui.components.WaveformView
 import org.jtransforms.fft.DoubleFFT_1D // Added import
@@ -23,6 +27,13 @@ class SoundWaveformScreen : Fragment() {
         private const val TAG = "SoundWaveformScreen"
         
         fun newInstance() = SoundWaveformScreen()
+    }
+    private lateinit var dbHelper: CompensationDatabaseHelper
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        // now context is non-null
+        dbHelper = CompensationDatabaseHelper(context)
     }
 
     private lateinit var waveformView: WaveformView
@@ -44,7 +55,11 @@ class SoundWaveformScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "onViewCreated: Setting up UI components")
-        
+        val compensationFactor = dbHelper.getCompensationValue()
+        if (compensationFactor == null) {
+            showCompensationDialog()
+        }
+
         try {
             waveformView = view.findViewById(R.id.waveformView)
             frequencyWaveformView = view.findViewById(R.id.frequencyWaveformView) // Initialize new view
@@ -205,4 +220,32 @@ class SoundWaveformScreen : Fragment() {
         // For now, returning raw magnitudes as per user's code.
         return magnitudes
     }
+    private fun showCompensationDialog() {
+        var compensationValue: Float? = null
+        val editText = EditText(context)
+        editText.hint = "Inserisci il valore di compensazione (dB)"
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Valore di Compensazione")
+            .setMessage("Inserisci il valore di compensazione per il campionamento:")
+            .setView(editText)
+            .setPositiveButton("OK") { _, _ ->
+                val input = editText.text.toString()
+                try {
+                    val compensationValue = input.toFloat()
+                    Log.d("ciaooooooo", "Compensation value set to: $compensationValue")
+
+                    dbHelper?.saveCompensationValue(compensationValue)
+                } catch (e: NumberFormatException) {
+                    Log.e("cioaooo", "Invalid compensation value entered", e)
+                    compensationValue = null
+                }
+            }
+            .setNegativeButton("Annulla") { _, _ ->
+                Log.d("cioa", "Compensation dialog cancelled")
+            }
+            .setCancelable(false)
+            .show()
+    }
+  
 }
