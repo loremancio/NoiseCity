@@ -50,5 +50,11 @@ class CompensationDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, 
             null
         }
     }
+
+    fun deleteCompensationValue() {
+        val db = writableDatabase
+        db.execSQL("DELETE FROM $TABLE_NAME")
+        db.close()
+    }
 }
 

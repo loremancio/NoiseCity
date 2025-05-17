@@ -67,7 +67,7 @@ class DataSender(
         if (compensationFactor != null) {
           compenstaionFactorFloat = compensationFactor.toFloat()
         }
-        val dbSpl = dbFs + 45 + compenstaionFactorFloat// Reference level for SPL
+        val dbSpl = dbFs + compenstaionFactorFloat// Reference level for SPL
         val durationSec = sampleCount.toDouble() / SAMPLE_RATE
         sendToServer(dbSpl.toFloat(), durationSec)
         sumSquares = 0.0
