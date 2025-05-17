@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import android.util.Log
 import android.widget.Toast
 import it.dii.unipi.myapplication.app.Config
+import it.dii.unipi.myapplication.database.CompensationDatabaseHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -57,10 +58,18 @@ class DataSender(
       }
       offset += chunk
       if (sampleCount >= SAMPLE_RATE) {
+        
         val rms = sqrt(sumSquares / SAMPLE_RATE)
-        val db = 20 * log10(maxOf(rms, MIN_RMS))
+        val dbFs = 20 * log10(maxOf(rms, MIN_RMS))
+        val dataHelper = CompensationDatabaseHelper(context)
+        val compensationFactor = dataHelper.getCompensationValue()
+        var compenstaionFactorFloat: Float = 0f
+        if (compensationFactor != null) {
+          compenstaionFactorFloat = compensationFactor.toFloat()
+        }
+        val dbSpl = dbFs + compenstaionFactorFloat// Reference level for SPL
         val durationSec = sampleCount.toDouble() / SAMPLE_RATE
-        sendToServer(db.toFloat(), durationSec)
+        sendToServer(dbSpl.toFloat(), durationSec)
         sumSquares = 0.0
         sampleCount = 0
       }
@@ -119,29 +128,6 @@ class DataSender(
               Log.e(TAG, "Error sending data: Code ${resp.code}, Message: ${resp.message}, Response: $responseBodyString") // More detailed error
             }
           }
-          /*val request2 = Request.Builder()
-            .url("${Config.BASE_URL}/achievements_reached")
-            .build()
-
-          client.newCall(request2).execute().use { resp ->
-                if (resp.isSuccessful) {
-                  val responseBodyString = resp.body?.string() ?: throw Exception("Corpo vuoto")// Read body once
-                  Log.d(TAG, "sendToServer: Achievements data received successfully: $responseBodyString") // More detailed success log
-                  val json = JSONArray(responseBodyString)
-                  if (json.length() > 0) {
-                    val ach = json.getJSONObject(0)
-                    val title = ach.getString("title")
-                    val description = ach.getString("description")
-                    withContext(Dispatchers.Main) {
-                      Toast.makeText(context, "$title: $description", Toast.LENGTH_LONG).show()
-                    }
-                  } else {
-                    Log.d(TAG, "No achievements reached") // More detailed log
-                  }
-                } else {
-                    Log.d(TAG, "No receiving achievements data: Code ${resp.code}, Message: ${resp.message}") // More detailed error
-                }
-            }*/
         } catch (e: Exception) {
           Log.e(TAG, "sendToServer: Exception during network operation", e)
         }

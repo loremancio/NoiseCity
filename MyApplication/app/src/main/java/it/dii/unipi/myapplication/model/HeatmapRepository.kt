@@ -27,7 +27,7 @@ class HeatmapRepository {
     suspend fun fetchHeatmap(
         latitude: Double,
         longitude: Double,
-        radiusKm: Int = 5,
+        radiusKm: Double = 5.0,
         startTimeMillis: Long,
         endTimeMillis: Long
     ): List<WeightedLatLng> {

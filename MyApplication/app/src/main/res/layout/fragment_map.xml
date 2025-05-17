@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Centered date/time filter card -->
+    <!-- Centro filtro date/time -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/filterFormCard"
         android:layout_width="300dp"
@@ -66,18 +66,30 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Edit filters button bottom-end -->
     <ImageButton
         android:id="@+id/btnEditFilters"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="60dp"
         android:background="@drawable/round_button_background"
         android:src="@drawable/ic_edit"
         android:contentDescription="Modify filters"
         android:visibility="gone"
         android:elevation="8dp" />
+
+    <ImageButton
+        android:id="@+id/btnCenterLocation"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/round_button_background"
+        android:src="@drawable/ic_my_location"
+        android:contentDescription="@string/center_on_location"
+        android:visibility="gone"
+        android:elevation="8dp"/>
 
 </FrameLayout>

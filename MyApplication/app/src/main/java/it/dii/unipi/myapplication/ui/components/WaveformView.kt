@@ -17,6 +17,12 @@ class WaveformView @JvmOverloads constructor(
     defStyle: Int = 0
 ) : View(context, attrs, defStyle) {
 
+    enum class DataType {
+        TIME_DOMAIN,
+        FREQUENCY_DOMAIN
+    }
+
+    private var currentDataType: DataType = DataType.TIME_DOMAIN
     private var audioSample: AudioSample? = null
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -59,6 +65,8 @@ class WaveformView @JvmOverloads constructor(
     
     // Time axis markers (milliseconds)
     private val timeMarkers = listOf(0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000) // ms
+    // Frequency axis markers (Hertz) - Placeholder, adjust as needed
+    private val frequencyMarkers = listOf(0, 1000, 2000, 3000, 4000, 5000, 10000, 20000) // Hz
 
     /**
      * Sets the audio sample to be displayed in the waveform view.
@@ -66,6 +74,15 @@ class WaveformView @JvmOverloads constructor(
     fun setAudioSample(sample: AudioSample) {
         this.audioSample = sample
         invalidate()
+    }
+
+    /**
+     * Sets the data type for the waveform view (Time or Frequency domain).
+     * This will affect how the X-axis is drawn.
+     */
+    fun setDataType(dataType: DataType) {
+        this.currentDataType = dataType
+        invalidate() // Redraw with new axis labels
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -90,7 +107,7 @@ class WaveformView @JvmOverloads constructor(
         // Draw the Y-axis title first
         canvas.save()
         canvas.rotate(-90f, yAxisTitleX, yAxisTitleY)
-        val yLabelText = "Ampiezza"
+        val yLabelText = if (currentDataType == DataType.FREQUENCY_DOMAIN) "Magnitudo" else "Ampiezza"
         val yTitleWidth = titlePaint.measureText(yLabelText)
         canvas.drawText(yLabelText, yAxisTitleX - yTitleWidth / 2, yAxisTitleY, titlePaint)
         canvas.restore()
@@ -127,9 +144,13 @@ class WaveformView @JvmOverloads constructor(
     private fun drawGridAndAxes(canvas: Canvas, leftMargin: Float, topMargin: Float, width: Float, height: Float) {
         // Draw grid
         val samplesCount = audioSample?.samples?.size ?: 0
-        val durationMs = if (samplesCount > 0) (samplesCount * 1000f) / sampleRate else 0f
-        
-        // Draw horizontal grid lines (amplitude) - draw these first as background
+        val durationMs = if (samplesCount > 0 && currentDataType == DataType.TIME_DOMAIN) (samplesCount * 1000f) / sampleRate else 0f
+        // For frequency domain, X-axis represents frequency up to Nyquist / 2 (sampleRate / 2)
+        // The actual max frequency displayed will depend on the FFT output size.
+        // Let's assume the FFT output also has 'samplesCount' points for now, mapping to sampleRate / 2 Hz.
+        val maxFrequencyHz = if (samplesCount > 0 && currentDataType == DataType.FREQUENCY_DOMAIN) sampleRate / 2f else 0f
+
+        // Draw horizontal grid lines (amplitude/magnitude) - draw these first as background
         val amplitudeMarkers = listOf(-1.0f, -0.75f, -0.5f, -0.25f, 0.0f, 0.25f, 0.5f, 0.75f, 1.0f)  // More gridlines
         for (marker in amplitudeMarkers) {
             val y = topMargin + height / 2 - (marker * height / 2)
@@ -145,30 +166,39 @@ class WaveformView @JvmOverloads constructor(
         }
         
         if (samplesCount > 0) {
-            // Draw vertical grid lines (time)
-            for (marker in timeMarkers) {
-                if (marker <= durationMs) {
-                    val x = leftMargin + (marker / durationMs) * width
-                    
-                    // Draw grid line
-                    val gridLinePaint = Paint(gridPaint)
-                    if (marker % 500 == 0) {  // Make lines at 0, 500, 1000, etc. more visible
-                        gridLinePaint.strokeWidth = 1.8f
-                        gridLinePaint.alpha = 220
+            // Draw vertical grid lines (time or frequency)
+            val markers = if (currentDataType == DataType.TIME_DOMAIN) timeMarkers else frequencyMarkers
+            val maxXValue = if (currentDataType == DataType.TIME_DOMAIN) durationMs else maxFrequencyHz
+
+            if (maxXValue > 0) { // Ensure maxXValue is positive to avoid division by zero or incorrect rendering
+                for (marker in markers) {
+                    if (marker <= maxXValue) {
+                        val x = leftMargin + (marker / maxXValue) * width
+                        
+                        // Draw grid line
+                        val gridLinePaint = Paint(gridPaint)
+                        // Optional: make some grid lines more visible
+                        if (currentDataType == DataType.TIME_DOMAIN && marker % 500 == 0) {
+                            gridLinePaint.strokeWidth = 1.8f
+                            gridLinePaint.alpha = 220
+                        } else if (currentDataType == DataType.FREQUENCY_DOMAIN && marker % 1000 == 0) { // Example for frequency
+                            gridLinePaint.strokeWidth = 1.8f
+                            gridLinePaint.alpha = 220
+                        }
+                        
+                        canvas.drawLine(
+                            x, 
+                            topMargin, 
+                            x, 
+                            topMargin + height, 
+                            gridLinePaint
+                        )
                     }
-                    
-                    canvas.drawLine(
-                        x, 
-                        topMargin, 
-                        x, 
-                        topMargin + height, 
-                        gridLinePaint
-                    )
                 }
             }
         }
         
-        // Draw X-axis (time)
+        // Draw X-axis (time or frequency)
         canvas.drawLine(
             leftMargin, 
             topMargin + height, 
@@ -186,22 +216,32 @@ class WaveformView @JvmOverloads constructor(
             axisPaint
         )
         
-        // Draw time markers
+        // Draw time or frequency markers
         if (samplesCount > 0) {
-            for (marker in timeMarkers) {
-                if (marker <= durationMs) {
-                    val x = leftMargin + (marker / durationMs) * width
-                    // Draw tick mark
-                    canvas.drawLine(x, topMargin + height, x, topMargin + height + tickLength, axisPaint)
-                    
-                    // Draw label
-                    val labelText = "${marker}ms"
-                    val textWidth = textPaint.measureText(labelText)
-                    val textX = x - textWidth / 2
-                    val textY = topMargin + height + tickLength + labelMargin + textPaint.textSize / 2
-                    
-                    // Draw text
-                    canvas.drawText(labelText, textX, textY, textPaint)
+            val markers = if (currentDataType == DataType.TIME_DOMAIN) timeMarkers else frequencyMarkers
+            val maxXValue = if (currentDataType == DataType.TIME_DOMAIN) durationMs else maxFrequencyHz
+
+            if (maxXValue > 0) { // Ensure maxXValue is positive
+                for (markerValue in markers) {
+                    if (markerValue <= maxXValue) {
+                        val x = leftMargin + (markerValue / maxXValue) * width
+                        // Draw tick mark
+                        canvas.drawLine(x, topMargin + height, x, topMargin + height + tickLength, axisPaint)
+                        
+                        // Draw label
+                        val labelText = if (currentDataType == DataType.TIME_DOMAIN) {
+                            "${markerValue}ms"
+                        } else {
+                            // Format frequency labels (e.g., "1kHz", "2kHz")
+                            if (markerValue >= 1000) "${markerValue / 1000}kHz" else "${markerValue}Hz"
+                        }
+                        val textWidth = textPaint.measureText(labelText)
+                        val textX = x - textWidth / 2
+                        val textY = topMargin + height + tickLength + labelMargin + textPaint.textSize / 2
+                        
+                        // Draw text
+                        canvas.drawText(labelText, textX, textY, textPaint)
+                    }
                 }
             }
         }
@@ -233,7 +273,7 @@ class WaveformView @JvmOverloads constructor(
         }
         
         // Draw X-axis title
-        val xLabelText = "Tempo (ms)"
+        val xLabelText = if (currentDataType == DataType.TIME_DOMAIN) "Tempo (ms)" else "Frequenza (Hz)"
         val xLabelWidth = titlePaint.measureText(xLabelText)
         val xLabelX = leftMargin + width / 2 - xLabelWidth / 2
         val xLabelY = topMargin + height + tickLength + labelMargin + textPaint.textSize * 1.8f
