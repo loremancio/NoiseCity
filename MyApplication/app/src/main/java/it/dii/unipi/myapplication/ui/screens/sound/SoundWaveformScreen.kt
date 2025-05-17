@@ -65,7 +65,8 @@ class SoundWaveformScreen : Fragment() {
 
         try {
             waveformView = view.findViewById(R.id.waveformView)
-            frequencyWaveformView = view.findViewById(R.id.frequencyWaveformView) // Initialize new view
+            frequencyWaveformView = view.findViewById(R.id.frequencyWaveformView)
+            frequencyWaveformView.setMaxDisplayFrequency(10_000f) // Limit FFT graph to 10 kHz
             btnStart = view.findViewById(R.id.btnStart)
             btnStop = view.findViewById(R.id.btnStop)
             
@@ -99,14 +100,13 @@ class SoundWaveformScreen : Fragment() {
     private fun updateWaveform(sample: AudioSample) {
         try {
             waveformView.setAudioSample(sample)
-            waveformView.setDataType(WaveformView.DataType.TIME_DOMAIN) // Explicitly set for clarity
+            waveformView.setDataType(WaveformView.DataType.TIME_DOMAIN)
 
-            // Calculate FFT and update frequencyWaveformView
             val fftData = calculateFFT(sample.samples)
             val frequencySample = AudioSample(fftData)
             frequencyWaveformView.setAudioSample(frequencySample)
-            frequencyWaveformView.setDataType(WaveformView.DataType.FREQUENCY_DOMAIN) // Set data type for frequency view
-
+            frequencyWaveformView.setDataType(WaveformView.DataType.FREQUENCY_DOMAIN)
+            frequencyWaveformView.setFixedYLimits(0f, 300f)
         } catch (e: Exception) {
             Log.e(TAG, "Error updating waveform", e)
         }
@@ -126,36 +126,40 @@ class SoundWaveformScreen : Fragment() {
         if (Integer.highestOneBit(effectiveN) != effectiveN && effectiveN > 1) { // if not a power of 2 and n > 1
             effectiveN = Integer.highestOneBit(effectiveN) shl 1 // next power of 2
         }
-        
+    
         val dataToTransform: DoubleArray
         if (effectiveN != n || n == 1) { // Pad if n was not power of two, or if n was 1 (needs at least 2 for FFT)
-             if (n == 1 && effectiveN < 2) effectiveN = 2 // Ensure at least size 2 for n=1 case
+             if (n==1 && effectiveN < 2) effectiveN = 2 // Ensure at least size 2 for n=1 case
             dataToTransform = DoubleArray(effectiveN)
             for (i in audioData.indices) {
                 if (i < effectiveN) {
                     dataToTransform[i] = audioData[i].toDouble()
                 }
             }
-            // The rest of dataToTransform is already 0.0 (default for DoubleArray)
             n = effectiveN // Update n to the new padded size
         } else {
             dataToTransform = DoubleArray(n) { i -> audioData[i].toDouble() }
         }
 
+
         DoubleFFT_1D(n.toLong()).realForward(dataToTransform)
         val magnitudes = FloatArray(n / 2)
 
         magnitudes[0] = kotlin.math.abs(dataToTransform[0]).toFloat() // DC component (R[0])
-
+    
         for (i in 1 until n / 2) {
             val re = dataToTransform[2 * i]
             val im = dataToTransform[2 * i + 1]
             magnitudes[i] = sqrt(re * re + im * im).toFloat()
         }
         
+     
+
+
+        // Normalize magnitudes? Optional, but often done.
+        // For now, returning raw magnitudes as per user's code.
         return magnitudes
     }
-
     private fun showCompensationDialog() {
             // 1. Inflate
             val dialogView = layoutInflater.inflate(R.layout.dialog_compensation, null)
