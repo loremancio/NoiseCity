@@ -66,7 +66,7 @@ class WaveformView @JvmOverloads constructor(
     // Time axis markers (milliseconds)
     private val timeMarkers = listOf(0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000) // ms
     // Frequency axis markers (Hertz) - Placeholder, adjust as needed
-    private val frequencyMarkers = listOf(2000, 3000, 4000, 5000, 10000, 20000) // Hz
+    private val frequencyMarkers = listOf(1000, 2000, 3000, 4000, 5000, 10000) // Hz
 
     // Maximum magnitude for Y-axis scaling in frequency domain
     private var maxMagnitude: Float? = null
