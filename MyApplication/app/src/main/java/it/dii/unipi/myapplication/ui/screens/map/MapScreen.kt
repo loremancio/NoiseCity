@@ -53,7 +53,7 @@ class MapScreen : Fragment() {
     private lateinit var btnApply: Button
     private lateinit var btnEditFilters: ImageButton
     private lateinit var filterForm: View
-    private lateinit var btnCenterLocation: com.google.android.material.floatingactionbutton.FloatingActionButton
+    private lateinit var btnCenterLocation: ImageButton
 
     private var startTimeMillis: Long? = null
     private var endTimeMillis:   Long? = null
@@ -129,6 +129,7 @@ class MapScreen : Fragment() {
             }
             filterForm.visibility = View.GONE
             btnEditFilters.visibility = View.VISIBLE
+            btnCenterLocation.visibility = View.VISIBLE
             // Centrati sulla location utente
             lastDeviceLocation?.let {
                 googleMap?.animateCamera(
@@ -154,6 +155,7 @@ class MapScreen : Fragment() {
         btnEditFilters.setOnClickListener {
             filterForm.visibility = View.VISIBLE
             btnEditFilters.visibility = View.GONE
+            btnCenterLocation.visibility = View.GONE
         }
 
         // Ricentra su posizione utente

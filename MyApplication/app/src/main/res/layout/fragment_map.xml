@@ -66,32 +66,30 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Bottone per modificare i filtri -->
     <ImageButton
         android:id="@+id/btnEditFilters"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="60dp"
         android:background="@drawable/round_button_background"
         android:src="@drawable/ic_edit"
         android:contentDescription="Modify filters"
         android:visibility="gone"
         android:elevation="8dp" />
 
-    <!-- Bottone per ricentrare la mappa sulla posizione -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <ImageButton
         android:id="@+id/btnCenterLocation"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_gravity="bottom|start"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/round_button_background"
         android:src="@drawable/ic_my_location"
         android:contentDescription="@string/center_on_location"
-        app:backgroundTint="@color/primary_blue"
-        app:tint="@android:color/white"
+        android:visibility="gone"
         android:elevation="8dp"/>
 
 </FrameLayout>
