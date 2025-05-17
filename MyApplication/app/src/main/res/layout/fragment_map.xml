@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Centered date/time filter card -->
+    <!-- Centro filtro date/time -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/filterFormCard"
         android:layout_width="300dp"
@@ -66,7 +66,7 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Edit filters button bottom-end -->
+    <!-- Bottone per modificare i filtri -->
     <ImageButton
         android:id="@+id/btnEditFilters"
         android:layout_width="56dp"
@@ -79,5 +79,19 @@
         android:contentDescription="Modify filters"
         android:visibility="gone"
         android:elevation="8dp" />
+
+    <!-- Bottone per ricentrare la mappa sulla posizione -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnCenterLocation"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="48dp"
+        android:src="@drawable/ic_my_location"
+        android:contentDescription="@string/center_on_location"
+        app:backgroundTint="@color/primary_blue"
+        app:tint="@android:color/white"
+        android:elevation="8dp"/>
 
 </FrameLayout>

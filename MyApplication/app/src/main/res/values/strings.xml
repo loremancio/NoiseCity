@@ -12,4 +12,5 @@
     <string name="registration_confirm_password">Confirm Password</string>
     <string name="registration_sign_up_button">Sign Up</string>
     <string name="registration_go_back_button">Go Back to Login</string>
+    <string name="center_on_location">center</string>
 </resources>
