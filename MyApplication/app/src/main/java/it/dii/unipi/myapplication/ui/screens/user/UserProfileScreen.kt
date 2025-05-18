@@ -5,13 +5,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.button.MaterialButton
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import it.dii.unipi.myapplication.R
 import it.dii.unipi.myapplication.app.Config
+import it.dii.unipi.myapplication.database.CompensationDatabaseHelper
 import it.dii.unipi.myapplication.model.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,6 +47,43 @@ class UserProfileScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fetchUserSummary(view)
+        // Setup compensation factor edit button
+        val btnEditCompensation = view.findViewById<Button>(R.id.btnEditCompensation)
+        btnEditCompensation.setOnClickListener {
+            showCompensationDialog()
+        }
+    }
+
+    /**
+     * Shows a dialog to edit and save the compensation factor.
+     */
+    private fun showCompensationDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_compensation, null)
+        val editText = dialogView.findViewById<EditText>(R.id.etCompensation)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+        val btnOk    = dialogView.findViewById<MaterialButton>(R.id.btnOkCustom)
+
+        val dbHelper = CompensationDatabaseHelper(requireContext())
+        val currentValue = dbHelper.getCompensationValue()
+        if (currentValue != null) editText.setText(currentValue.toString())
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnOk.setOnClickListener {
+            val input = editText.text.toString()
+            try {
+                val value = input.toFloat()
+                dbHelper.saveCompensationValue(value)
+                dialog.dismiss()
+            } catch (e: NumberFormatException) {
+                editText.error = "Invalid value"
+            }
+        }
+        dialog.show()
     }
 
     private fun fetchUserSummary(view: View) {

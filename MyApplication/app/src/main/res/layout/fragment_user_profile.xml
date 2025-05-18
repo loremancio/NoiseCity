@@ -222,5 +222,16 @@
                     android:textColor="@color/black" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
+
+        <Button
+            android:id="@+id/btnEditCompensation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Modifica compensation factor"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="@color/primary_blue"
+            android:textColor="@android:color/white" />
     </LinearLayout>
 </LinearLayout>
