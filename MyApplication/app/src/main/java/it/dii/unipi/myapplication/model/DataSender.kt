@@ -46,39 +46,10 @@ class DataSender(
   private var sumSquares = 0.0
   private var sampleCount = 0
 
-  fun processBuffer(buffer: FloatArray) {
-    var offset = 0
-    while (offset < buffer.size) {
-      val remain = SAMPLE_RATE - sampleCount
-      val chunk = minOf(buffer.size - offset, remain)
-      for (i in 0 until chunk) {
-        val v = buffer[offset + i]
-        sumSquares += v * v
-        sampleCount++
-      }
-      offset += chunk
-      if (sampleCount >= SAMPLE_RATE) {
-        
-        val rms = sqrt(sumSquares / SAMPLE_RATE)
-        val dbFs = 20 * log10(maxOf(rms, MIN_RMS))
-        val dataHelper = CompensationDatabaseHelper(context)
-        val compensationFactor = dataHelper.getCompensationValue()
-        var compenstaionFactorFloat: Float = 0f
-        if (compensationFactor != null) {
-          compenstaionFactorFloat = compensationFactor.toFloat()
-        }
-        val dbSpl = dbFs + compenstaionFactorFloat// Reference level for SPL
-        val durationSec = sampleCount.toDouble() / SAMPLE_RATE
-        sendToServer(dbSpl.toFloat(), durationSec)
-        sumSquares = 0.0
-        sampleCount = 0
-      }
-    }
-  }
-
-  private fun sendToServer(noiseLevel: Float, durationSec: Double) {
-    // Directly call LocationHelper without suspend
-    LocationHelper(context).getCurrentLocation { location ->
+    fun sendToServer(sample: AudioSample) {
+      val noiseLevel = sample.averageDbWithCompensation(context)
+      val durationSec = sample.samples.size.toDouble() / SAMPLE_RATE
+      LocationHelper(context).getCurrentLocation { location ->
       if (location == null) {
         Log.e(TAG, "sendToServer: Location is null. Cannot send data.")
         return@getCurrentLocation

@@ -207,7 +207,8 @@ class WaveformView @JvmOverloads constructor(
                     canvas.drawLine(x, top + height, x, top + height + tickLength, axisPaint)
                     val label = if (markerHz >= 1000) "${markerHz / 1000}kHz" else "${markerHz}Hz"
                     val textW = textPaint.measureText(label)
-                    canvas.drawText(label, x - textW / 2, top + height + tickLength + labelMargin + textPaint.textSize / 2, textPaint)
+                    canvas.drawText(label, x - textW / 2, 
+                        top + height + tickLength + labelMargin + textPaint.textSize / 2, textPaint)
                 }
         } else {
             // 5) Time‐domain vertical grid exactly as before
@@ -219,7 +220,8 @@ class WaveformView @JvmOverloads constructor(
                     canvas.drawLine(x, top + height, x, top + height + tickLength, axisPaint)
                     val label = "${markerMs}ms"
                     val textW = textPaint.measureText(label)
-                    canvas.drawText(label, x - textW / 2, top + height + tickLength + labelMargin + textPaint.textSize / 2, textPaint)
+                    canvas.drawText(label, x - textW / 2, 
+                        top + height + tickLength + labelMargin + textPaint.textSize / 2, textPaint)
                 }
             }
         }

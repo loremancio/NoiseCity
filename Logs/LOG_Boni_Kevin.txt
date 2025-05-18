@@ -1,0 +1,55 @@
+03/05/2025
+    - Prima chiamata di gruppo [vedi LOG_GROUP.txt]
+
+04/05/2025
+    - Implementazione del backend per il server
+    - Deployment server e database mongoDB su server locale
+    - Chiamata con Alice Orlandini per definire le specifiche relative a login e registrazione
+
+05/05/2025
+    - Aggiunta del file README.md e di un esempio di .env per backend 
+    - Creazione chiamate API per la registrazione e login utente
+
+06/05/2025
+    - Implementazione registrazione audio ambientale
+    - Creazione della vista “waveform” per la rappresentazione grafica del segnale audio 
+
+8/05/2025
+    - Seconda chiamata di gruppo [vedi LOG_GROUP.txt]
+    - Implementazione calcolo decibel medi
+
+9/05/2025
+    - Implementazione invio dati audio al server
+
+10/05/2025
+    - Terza chiamata di gruppo [vedi LOG_GROUP.txt]
+    - Ottimizzazione del sender verso il database: calcolo e invio di un campione ogni secondo 
+
+12/05/2025
+    - Studio per impelmentazione del calcolo della FFT per l’analisi del segnale audio
+  
+13/05/2025
+    - Quarta chiamata di gruppo [vedi LOG_GROUP.txt]
+    - Corretto bug di autenticazione sul backend 
+
+14/05/2025
+    - Prima implementazione dell’algoritmo FFT per l’analisi del segnale audio 
+
+15/05/2025
+    - Aggiunta del fattore di compensazione nei calcoli dei dati nel contesto del progetto 
+
+16/05/2025
+    - Modifica salvataggio fattore di compesazione su sqlite per persistenza dati 
+    - Rifinitura dell’implementazione FFT 
+  
+17/05/2025
+    - Aggiunta della “movement map” per il tracciamento degli spostamenti utente con Alice Orlandini
+    - Correzione dei pulsanti nell’interfaccia utente 
+    - Fix dei grafici per una visualizzazione più accurata  
+    - Test dell'applicazione testando su zone con diverse intensità di rumore con Alice Orlandini  
+
+18/05/2025
+    - refattoring del codice
+    - Quinta chiamata di gruppo [vedi LOG_GROUP.txt]
+    - Test dell'analisi in frequenza 
+    - Documentazione grafici e analisi e implementazioni future

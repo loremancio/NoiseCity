@@ -83,14 +83,14 @@ class AudioRecorder (
                             val floatBuffer = FloatArray(read) { i ->
                                 shortBuffer[i] / Short.MAX_VALUE.toFloat()
                             }
+                            val sample = AudioSample(floatBuffer)
                            
                             withContext(Dispatchers.Main) {
-                                sampleCallback?.invoke(AudioSample(floatBuffer))
+                                sampleCallback?.invoke(sample)
                             }
-                            
-                            launch(Dispatchers.Default) { 
-                                audioSender.processBuffer(floatBuffer)
-                          }
+                            launch(Dispatchers.Default) {
+                                audioSender.sendToServer(sample)
+                            }
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "Error reading audio", e)
