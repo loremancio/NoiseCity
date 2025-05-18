@@ -20,7 +20,7 @@ def create_app():
     mongo.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
-    login_manager.login_view = 'login'
+    login_manager.login_view = 'main.login'
 
     from app.routes import bp as main_bp
     app.register_blueprint(main_bp)

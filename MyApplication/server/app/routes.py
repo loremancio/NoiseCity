@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify
-from flask_login import login_user, logout_user, current_user
+from flask import Blueprint, redirect, request, jsonify, url_for
+from flask_login import login_required, login_user, logout_user, current_user
 from app.repository import UserRepository, MeasurementRepository, RawMeasurementRepository
 from app.extensions import login_manager
 from datetime import datetime
@@ -10,6 +10,8 @@ bp = Blueprint('main', __name__)
 
 @login_manager.user_loader
 def load_user(user_id):
+    if not user_id: 
+        return None
     return UserRepository.get_by_id(user_id)
 
 @bp.route('/register', methods=['POST'])
@@ -24,8 +26,15 @@ def register():
         return jsonify({'error': error}), 409
     return jsonify({'message': 'Registration successful'})
 
-@bp.route('/login', methods=['POST'])
+@bp.route('/login', methods=['POST', 'GET'])
 def login():
+    if request.method == 'GET':
+        print(f"GET request to login")
+        print(f"Current user is authenticated: {current_user.is_authenticated}")
+        if current_user.is_authenticated:
+            next_url = request.args.get('next') or url_for('main.profile')
+            return redirect(next_url)
+
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
@@ -36,13 +45,13 @@ def login():
     return jsonify({'error': 'Invalid credentials'}), 401
 
 @bp.route('/logout')
-@login_manager.user_loader
+@login_required
 def logout():
     logout_user()
     return jsonify({'message': 'Logout successful'})
 
 @bp.route('/profile', methods=['GET'])
-@login_manager.user_loader
+@login_required
 def profile():
     """
     this method should return the user profile, including the username and their achievements
@@ -81,6 +90,7 @@ def profile():
     return jsonify({'error': 'User not found'}), 404
 
 @bp.route('/upload', methods=['POST'])
+@login_required
 def upload():
     data = request.get_json()
     print(f"Received data")
@@ -89,7 +99,7 @@ def upload():
     return jsonify({'message': 'Audio data received successfully'})
 
 @bp.route('/measurements', methods=['POST'])
-@login_manager.user_loader
+@login_required
 def add_measurement():
 
     print("Received data", request)
@@ -137,7 +147,7 @@ def add_measurement():
 
 
 @bp.route('/measurements', methods=['GET'])
-@login_manager.user_loader
+@login_required
 def get_measurements():
     try:
         latitude = request.args.get('latitude', type=float)
@@ -186,6 +196,7 @@ def get_measurements():
 
 
 @bp.route('/raw_measurements', methods=['GET'])
+@login_required
 def get_raw_measurements_by_user():
     username = request.args.get('username')
 
@@ -194,7 +205,7 @@ def get_raw_measurements_by_user():
 
 
 @bp.route('/user_summary', methods=['GET'])
-# @login_required
+@login_required
 def user_summary():
     try:
         username = "lore"
@@ -222,7 +233,7 @@ def user_summary():
 
 
 @bp.route('/achievements_reached', methods=['GET'])
-# @login_required
+@login_required
 def achievements_reached():
     try:
         # Simulate fetching achievements from the database
