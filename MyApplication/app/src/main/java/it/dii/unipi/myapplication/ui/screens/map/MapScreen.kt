@@ -76,23 +76,13 @@ class MapScreen : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_map, container, false)
 
-        // Inizializza view
-        mapView = view.findViewById(R.id.mapView)
-        etStart = view.findViewById(R.id.etStart)
-        etEnd = view.findViewById(R.id.etEnd)
-        btnApply = view.findViewById(R.id.btnApply)
-        btnEditFilters = view.findViewById(R.id.btnEditFilters)
-        filterForm = view.findViewById(R.id.filterFormCard)
-        btnCenterLocation = view.findViewById(R.id.btnCenterLocation)
 
-        // Location API
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
-        locationRequest = LocationRequest.create().apply {
-            interval = 10_000
-            fastestInterval = 5_000
-            priority = Priority.PRIORITY_HIGH_ACCURACY
-            smallestDisplacement = 0f // gestito manualmente
-        }
+        mapView         = view.findViewById(R.id.mapView)
+        etStart         = view.findViewById(R.id.etStart)
+        etEnd           = view.findViewById(R.id.etEnd)
+        btnApply        = view.findViewById(R.id.btnApply)
+        btnEditFilters  = view.findViewById(R.id.btnEditFilters)
+        filterForm      = view.findViewById(R.id.filterFormCard)
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
