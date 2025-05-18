@@ -37,6 +37,7 @@ import java.util.Calendar
 import java.util.Date
 import android.app.TimePickerDialog
 import android.util.Log
+import it.dii.unipi.myapplication.controller.LoginActivity
 import java.lang.Double
 
 class MapScreen : Fragment() {
@@ -58,7 +59,7 @@ class MapScreen : Fragment() {
     private var startTimeMillis: Long? = null
     private var endTimeMillis:   Long? = null
 
-    private val heatmapRepo = HeatmapRepository()
+    private lateinit var heatmapRepo: HeatmapRepository
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
@@ -75,7 +76,7 @@ class MapScreen : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_map, container, false)
-
+        heatmapRepo = HeatmapRepository(requireContext())
 
         mapView         = view.findViewById(R.id.mapView)
         etStart         = view.findViewById(R.id.etStart)
@@ -83,6 +84,15 @@ class MapScreen : Fragment() {
         btnApply        = view.findViewById(R.id.btnApply)
         btnEditFilters  = view.findViewById(R.id.btnEditFilters)
         filterForm      = view.findViewById(R.id.filterFormCard)
+        btnCenterLocation = view.findViewById(R.id.btnCenterLocation)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        locationRequest = LocationRequest.create().apply {
+            interval = 10_000
+            fastestInterval = 5_000
+            priority = Priority.PRIORITY_HIGH_ACCURACY
+            smallestDisplacement = 0f // gestito manualmente
+        }
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->

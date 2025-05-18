@@ -21,7 +21,7 @@ class SessionManager(context: Context) {
     }
 
     fun saveUsernameToSession(cookie: String) {
-        preferences.edit { putString("cookie", cookie) }
+        preferences.edit { putString("username", cookie) }
     }
 
     fun isLoggedIn(): Boolean {
