@@ -1,1 +1,32 @@
+Group Log 
 
+03/05/2025:
+- Definito le funzionalità principali dell'applicazione e le schermate necessarie.
+- Divisione dei compiti tra i membri del team.
+  - Lorenzo Mancinelli: Setup del progetto, implementazione della localizzazione e dell'invio dei dati.
+  - Giovanni Enrico Loni: Ideazione dell'aggregazione da effettaure sui dati per visualizzare la heatmap.
+  - Alice Orlandini: Sviluppo del frontend della schermata di login e registrazione e studio della realizzazione della mappa.
+  - Kevin Boni: Sviluppo del backend della login e registrazione, setup di MongoDB e realizzazione della waveform audio.
+
+08/05/2025:
+- Incontro con il team per discutere i progressi e delle problematiche.
+- Nuova divisione dei compiti:
+  - Lorenzo Mancinelli: Implementazione frontend degli achievements.
+  - Giovanni Enrico Loni: Implementazione dell'aggragazione dei dati per la heatmap, implementazione backend degli achievements.
+  - Alice Orlandini: Implementazione della navbar e sviluppo della schermata della heatmap.
+  - Kevin Boni: Implementazione FFT, sampling audio.
+
+10/05/2025:
+- Incontro per risolvere problematiche relative all'invio dei dati al server.
+- Creazione dell'API key per la mappa di Google e test della schermata della heatmap con l'aggregazione dei dati.
+
+13/05/2025: 
+- Allineamento sugli sviluppi.
+- Decisione di aggiungere un cookie per l'autenticazione dell'utente e implementazione sul momento.
+
+18/05/2025: 
+- Aggiornamento della documentazione del progetto.
+- Organizzazione incontro del giorno dopo.
+
+19/05/2025:
+- Incontro di persona per testare l'applicazione in un ambiente reale.

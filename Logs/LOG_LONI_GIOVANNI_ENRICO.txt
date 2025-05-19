@@ -1,0 +1,40 @@
+03/05/2025
+    - Prima chiamata di gruppo [vedi LOG_GROUP.txt]
+
+05/05/2025
+    - Studio di Data Engineering sulla struttura del database
+    - Creazione del database MongoDB
+
+07/05/2025
+    - Creazione chiamate API per l'invio e la ricezione delle misurazioni
+
+08/05/2025
+    - Seconda chiamata di gruppo [vedi LOG_GROUP.txt]
+
+09/05/2025
+    - Studio per l'implementazione delle misure aggregate tramite geohashing
+    - Data Engineering per le collezioni delle misure aggregate
+
+10/05/2025
+    - Implementazione della strategia di aggregazione delle misure nel backend
+    - Terza chiamata di gruppo [vedi LOG_GROUP.txt]
+
+11/05/2025
+    - Incontro con Mancinelli per definire lo scheletro e le funzionalitÃ della pagina utente, nella quale sono riassunti gli achievement e le statistiche personali
+    - Prima implementazione degli achievement
+
+12/05/2025
+    - Refactor del codice per la gestione degli achievement
+
+13/05/2025
+    - Quarta chiamata di gruppo [vedi LOG_GROUP.txt]
+    - Refactoring del backend
+
+15/05/2025
+    - Scrittura della documentazione per il backend
+
+16-17/05/2025
+    - Bugfixing e test dell'applicazione in contesto reale
+
+18/05/2025
+    - Quinta chiamata di gruppo [vedi LOG_GROUP.txt]
