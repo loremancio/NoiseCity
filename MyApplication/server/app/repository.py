@@ -446,12 +446,12 @@ class RawMeasurementRepository:
         :param user_id: str o ObjectId, l'id dell'utente.
         :return: lista di dict con le misurazioni.
         """
-        # Se user_id è una stringa, convertila in ObjectId
+        # If the user_id is a string, convert it to ObjectId
         if isinstance(user_id, str):
             try:
                 user_id = ObjectId(user_id)
             except Exception:
-                pass  # Se non è un ObjectId valido, lascia così (magari è già username)
+                pass  # If it's not a valid ObjectId, leave it as is (maybe it's already a username)
         query = {
             'user_id': user_id,
             'noise_level': { '$gt': -20}
@@ -470,12 +470,12 @@ class RawMeasurementRepository:
         :param user_id: str o ObjectId, l'id dell'utente.
         :return: lista di dict con le misurazioni.
         """
-        # Se user_id è una stringa, convertila in ObjectId
+        # If the user_id is a string, convert it to ObjectId
         if isinstance(user_id, str):
             try:
                 user_id = ObjectId(user_id)
             except Exception:
-                pass  # Se non è un ObjectId valido, lascia così (magari è già username)
+                pass  # If it's not a valid ObjectId, leave it as is (maybe it's already a username)
         query = {
             'user_id': user_id,
             'noise_level': { '$lt': -40}
