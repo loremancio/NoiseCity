@@ -42,59 +42,54 @@ class AudioRecorder (
 
     @SuppressLint("MissingPermission")
     fun startRecording(): Boolean {
-        if (audioRecord != null) {
-            Log.d(TAG, "Recording already started")
-            return false
-        }
+        if (audioRecord != null) return false
 
-        Log.d(TAG, "Starting recording with bufferSize=$bufferSize")
+        audioRecord = AudioRecord(
+            MediaRecorder.AudioSource.MIC,
+            SAMPLE_RATE,
+            CHANNEL_CONFIG,
+            AUDIO_FORMAT,
+            bufferSize
+        ).apply { startRecording() }
 
-        try {
-            audioRecord = AudioRecord(
-                MediaRecorder.AudioSource.MIC,
-                SAMPLE_RATE,
-                CHANNEL_CONFIG,
-                AUDIO_FORMAT,
-                bufferSize
-            ).apply { startRecording() }
-            
-            recordingJob = CoroutineScope(Dispatchers.IO).launch {
-                Log.d(TAG, "Recording coroutine started")
-                val shortBuffer = ShortArray(bufferSize)
-                
-                while (audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
-                    try {
-                        val read = audioRecord!!.read(shortBuffer, 0, shortBuffer.size)
-                        if (read > 0) {
-                            // convert to normalized float samples in [-1f,1f]
-                            val floatBuffer = FloatArray(read) { i ->
-                                shortBuffer[i] / Short.MAX_VALUE.toFloat()
-                            }
-                            val sample = AudioSample(floatBuffer)
-                           
-                            withContext(Dispatchers.Main) {
-                                sampleCallback?.invoke(sample)
-                            }
-                            launch(Dispatchers.Default) {
-                                audioSender.sendToServer(sample)
-                            }
+        recordingJob = CoroutineScope(Dispatchers.IO).launch {
+            val shortBuffer = ShortArray(bufferSize)
+            val floatBufferSec = FloatArray(SAMPLE_RATE)
+            var pos = 0
+
+            while (audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
+                val read = audioRecord!!.read(shortBuffer, 0, shortBuffer.size)
+                if (read <= 0) continue
+
+                val tempFloat = FloatArray(read) { i ->
+                    shortBuffer[i] / Short.MAX_VALUE.toFloat()
+                }
+
+                withContext(Dispatchers.Main) {
+                    sampleCallback?.invoke(AudioSample(tempFloat))
+                }
+
+                var offset = 0
+                while (offset < read) {
+                    val toCopy = minOf(read - offset, SAMPLE_RATE - pos)
+                    System.arraycopy(tempFloat, offset, floatBufferSec, pos, toCopy)
+                    pos += toCopy
+                    offset += toCopy
+                    // Check if we have filled one second of audio
+                    if (pos == SAMPLE_RATE) {
+                        val oneSecSample = AudioSample(floatBufferSec.copyOf())
+                        launch(Dispatchers.Default) {
+                            audioSender.sendToServer(oneSecSample)
                         }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error reading audio", e)
-                        break
+                        pos = 0
                     }
                 }
             }
-            return true
-        } catch (iae: IllegalArgumentException) {
-            Log.e(TAG, "Error creating AudioRecord", iae)
-            return false
-        } catch (se: SecurityException) {
-            Log.e(TAG, "Permission denied for AudioRecord", se)
-            return false
         }
+        return true
     }
 
+    
     fun stopRecording() {
         recordingJob?.cancel()
         audioRecord?.apply {
