@@ -55,4 +55,5 @@ Lorenzo Mancinelli
 - Effetuati test per completare capitolo "experimental results: energy consumption" della documentazione
 - Incontro con il gruppo per mostrare le funzionalità dell'applicazione in ambiente reale
 - Pulizia codice per visualizzazione statistiche e achievements
+- Caricamento log personale
 
