@@ -442,48 +442,63 @@ class RawMeasurementRepository:
     @staticmethod
     def get_high_exposure(user_id):
         """
-        Restituisce tutte le misurazioni raw per uno specifico user_id.
-        :param user_id: str o ObjectId, l'id dell'utente.
-        :return: lista di dict con le misurazioni.
+        Returns the total duration of high noise level exposures for a specific user.
+        :param user_id: str or ObjectId, the user's ID.
+        :return: total duration (int) of high exposure.
         """
-        # If the user_id is a string, convert it to ObjectId
+        # Convert user_id to ObjectId if it's a string
         if isinstance(user_id, str):
             try:
                 user_id = ObjectId(user_id)
             except Exception:
-                pass  # If it's not a valid ObjectId, leave it as is (maybe it's already a username)
+                pass  # If conversion fails, keep it as is (e.g., might be a username)
+
+        # Define query for high noise levels (above 70 dB)
         query = {
             'user_id': user_id,
-            'noise_level': { '$gt': -20}
+            'noise_level': { '$gt': 70 }
         }
+
+        # Use aggregation to sum durations of matching records
         pipeline = [
             { '$match': query },
             { '$group': { '_id': None, 'total_duration': { '$sum': '$duration' } } }
         ]
+
         result = list(mongo.db.raw_measurements.aggregate(pipeline))
+
+        # Return the total duration if results are found, otherwise 0
         return result[0]['total_duration'] if result else 0
+
 
     @staticmethod
     def get_low_exposure(user_id):
         """
-        Restituisce tutte le misurazioni raw per uno specifico user_id.
-        :param user_id: str o ObjectId, l'id dell'utente.
-        :return: lista di dict con le misurazioni.
+        Returns the total duration of low noise level exposures for a specific user.
+        :param user_id: str or ObjectId, the user's ID.
+        :return: total duration (int) of low exposure.
         """
-        # If the user_id is a string, convert it to ObjectId
+        # Convert user_id to ObjectId if it's a string
         if isinstance(user_id, str):
             try:
                 user_id = ObjectId(user_id)
             except Exception:
-                pass  # If it's not a valid ObjectId, leave it as is (maybe it's already a username)
+                pass  # If conversion fails, keep it as is (e.g., might be a username)
+
+        # Define query for low noise levels (below 50 dB)
         query = {
             'user_id': user_id,
-            'noise_level': { '$lt': -40}
+            'noise_level': { '$lt': 50 }
         }
+
+        # Use aggregation to sum durations of matching records
         pipeline = [
             { '$match': query },
             { '$group': { '_id': None, 'total_duration': { '$sum': '$duration' } } }
         ]
+
         result = list(mongo.db.raw_measurements.aggregate(pipeline))
+
+        # Return the total duration if results are found, otherwise 0
         return result[0]['total_duration'] if result else 0
-      
+

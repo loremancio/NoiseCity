@@ -89,20 +89,9 @@ def profile():
             log.error(f"User with ID {current_user.id} not found")
     return jsonify({'error': 'User not found'}), 404
 
-@bp.route('/upload', methods=['POST'])
-@login_required
-def upload():
-    data = request.get_json()
-    print(f"Received data")
-    print(data)
-
-    return jsonify({'message': 'Audio data received successfully'})
-
 @bp.route('/measurements', methods=['POST'])
 @login_required
 def add_measurement():
-
-    print("Received data", request)
     try:
         data = request.get_json()
 
@@ -134,8 +123,6 @@ def add_measurement():
             measurement["location"],
             measurement["duration"]
         )
-
-        print(f"Result of measurement processing: {result}")
 
         if result:
             return jsonify(result), 201
@@ -185,7 +172,6 @@ def get_measurements():
             start_ts=start_ts,
             end_ts=end_ts
         )
-        print(f"Measurements: {measurements}")
 
         # 5) Return JSON
         return jsonify(measurements), 200
@@ -193,57 +179,3 @@ def get_measurements():
     except Exception as e:
         # Log the error server‐side as needed
         return jsonify({"error": "Server error", "details": str(e)}), 500
-
-
-@bp.route('/raw_measurements', methods=['GET'])
-@login_required
-def get_raw_measurements_by_user():
-    username = request.args.get('username')
-
-    measurements = RawMeasurementRepository.get_all_by_user_id(username)
-    return jsonify(measurements), 200
-
-
-@bp.route('/user_summary', methods=['GET'])
-@login_required
-def user_summary():
-    try:
-        username = "lore"
-        achievements = [
-            {
-                "title": "City Explorer",
-                "description": "You have visited 2 cities"
-            },
-            {
-                "title": "World Traveler",
-                "description": "You have visited 2 countries"
-            },
-            {
-                "title": "Measurement Master",
-                "description": "You have made 5 measurements"
-            }
-        ]
-
-        return jsonify({
-            "username": username,
-            "achievements": achievements
-        }), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@bp.route('/achievements_reached', methods=['GET'])
-@login_required
-def achievements_reached():
-    try:
-        # Simulate fetching achievements from the database
-        achievements = [
-            {
-                "title": "World Traveler",
-                "description": "You have visited 2 countries"
-            }
-        ]
-
-        return jsonify(achievements), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
