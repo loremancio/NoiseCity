@@ -26,7 +26,7 @@
     - Ottimizzazione del sender verso il database: calcolo e invio di un campione ogni secondo 
 
 12/05/2025
-    - Studio per impelmentazione del calcolo della FFT per l’analisi del segnale audio
+    - Studio per implementazione del calcolo della FFT per l’analisi del segnale audio
   
 13/05/2025
     - Quarta chiamata di gruppo [vedi LOG_GROUP.txt]
@@ -39,17 +39,17 @@
     - Aggiunta del fattore di compensazione nei calcoli dei dati nel contesto del progetto 
 
 16/05/2025
-    - Modifica salvataggio fattore di compesazione su sqlite per persistenza dati 
+    - Modifica salvataggio fattore di compensazione su sqlite per persistenza dati 
     - Rifinitura dell’implementazione FFT 
   
 17/05/2025
-    - Aggiunta della “movement map” per il tracciamento degli spostamenti utente con Alice Orlandini
+    - Aggiunta della "movement map" per il tracciamento degli spostamenti utente con Alice Orlandini
     - Correzione dei pulsanti nell’interfaccia utente 
     - Fix dei grafici per una visualizzazione più accurata  
     - Test dell'applicazione testando su zone con diverse intensità di rumore con Alice Orlandini  
 
 18/05/2025
-    - refattoring del codice
+    - Refactoring del codice
     - Quinta chiamata di gruppo [vedi LOG_GROUP.txt]
     - Test dell'analisi in frequenza 
     - Documentazione grafici e analisi e implementazioni future

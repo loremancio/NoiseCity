@@ -1,0 +1,48 @@
+Alice Orlandini
+
+03/05/2025:
+- Prima chiamata di gruppo [vedi LOG_GROUP.txt].
+
+04/05/2025:
+- Chiamata con Kevin Boni per definire l'architettura della login e registrazione.
+
+06/05/2025:
+- Sviluppo delle schermate di login e registrazione.
+- Implementazione dell'invio dei dati di login e registrazione al server.
+
+07/05/2025:
+- Creazione della nuova icona dell'app e aggiornamento dei temi dell'app (palette di colori).
+- Risoluzione di bug nel flusso di autenticazione.
+
+08/05/2025:
+- Seconda chiamata di gruppo [vedi LOG_GROUP.txt].
+- Realizzazione della barra di navigazione inferiore per passare tra le sezioni Sound Wave, Heatmap e Profilo.
+
+10/05/2025:
+- Terza chiamata di gruppo [vedi LOG_GROUP.txt].
+- Implementazione della schermata Heatmap: rendering della mappa coi livelli di rumore.
+- Aggiunta di un filtro temporale per selezionare l'intervallo di dati da visualizzare.
+- Implementazione della chiamata al server per ottenere i dati della mappa.
+
+11/05/2025:
+- Implementazione della sessione utente per salvare il cookie e l'username, per gestire l'autenticazione lato client.
+- Aggiunta di un controllo all'avvio dell'app per bypassare la pagina di login se l'utente è già autenticato.
+
+13/05/2025:
+- Quarta chiamata di gruppo [vedi LOG_GROUP.txt].
+
+15/05/2025:
+- Scrittura della documentazione per la parte di architettura dell'applicazione.
+
+17/05/2025:
+- Continuazione della scrittura della documentazione.
+- Aggiunta della "movement map" per il tracciamento degli spostamenti utente e miglioramento schermata coi grafici del suono con Kevin Boni.
+- Test dell'applicazione in ambiente reale con Kevin Boni.
+
+18/05/2025:
+- Quinta chiamata di gruppo [vedi LOG_GROUP.txt].
+- Risoluzione di un bug che impediva l'ottenimento dei dati a causa di un problema di autenticazione dell'utente lato backend.
+
+19/05/2025:
+- Refactoring del codice backend e frontend.
+- Incontro con tutto il team per testare l'applicazione in un ambiente reale.
