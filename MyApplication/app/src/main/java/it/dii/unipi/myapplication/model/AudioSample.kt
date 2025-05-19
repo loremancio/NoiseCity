@@ -6,6 +6,7 @@ import org.jtransforms.fft.DoubleFFT_1D
 import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.sqrt
+import android.util.Log
 
 /**
  * Represents an audio sample and provides methods for signal processing.
@@ -59,6 +60,8 @@ data class AudioSample(
      * @return Average dB value (float) with compensation applied
      */
     fun averageDbWithCompensation(context: Context): Float {
+        val len = samples.size
+        Log.d("[TEST]", "averageDbWithCompensation: Calculating average dB with compensation $len")
         // 1) guard against empty sample array
         if (samples.isEmpty()) return Float.NEGATIVE_INFINITY
     
