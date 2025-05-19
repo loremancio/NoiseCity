@@ -18,6 +18,9 @@ import it.dii.unipi.myapplication.MainActivity
 import it.dii.unipi.myapplication.model.LoginResult
 import it.dii.unipi.myapplication.model.SessionManager
 
+/**
+ * Activity that handles user login
+ */
 class LoginActivity : AppCompatActivity() {
 
     companion object {

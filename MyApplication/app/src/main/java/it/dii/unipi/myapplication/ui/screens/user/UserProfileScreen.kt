@@ -25,16 +25,17 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import kotlin.math.roundToInt
 
 class UserProfileScreen : Fragment() {
 
     companion object {
         private const val TAG = "UserProfileScreen"
-        private const val BASE_URL = Config.BASE_URL+ "/profile" // Sostituisci con il tuo IP reale
+        private const val BASE_URL = Config.BASE_URL + "/profile"
     }
 
     data class Achievement(val title: String, val description: String)
-    data class UserAchievements(val username: String, val achievements: List<Achievement>, val exposure_high: String, val exposure_low: String)
+    data class UserAchievements(val username: String, val achievements: List<Achievement>, val exposure_high: Int, val exposure_low: Int)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,9 +60,9 @@ class UserProfileScreen : Fragment() {
      */
     private fun showCompensationDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_compensation, null)
-        val editText = dialogView.findViewById<EditText>(R.id.etCompensation)
-        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
-        val btnOk    = dialogView.findViewById<MaterialButton>(R.id.btnOkCustom)
+        val editText   = dialogView.findViewById<EditText>(R.id.etCompensation)
+        val btnCancel  = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+        val btnOk      = dialogView.findViewById<MaterialButton>(R.id.btnOkCustom)
 
         val dbHelper = CompensationDatabaseHelper(requireContext())
         val currentValue = dbHelper.getCompensationValue()
@@ -107,13 +108,13 @@ class UserProfileScreen : Fragment() {
                 val userAchievements = withContext(Dispatchers.IO) {
                     val response = client.newCall(request).execute()
                     if (!response.isSuccessful) throw Exception("Errore HTTP: ${response.code}")
-                    val body = response.body?.string() ?: throw Exception("Corpo vuoto")
+                    val body = response.body?.string() ?: throw Exception("Empty Body")
 
                     val json = JSONObject(body)
                     val username = json.getString("username")
                     val achievementsJson = json.getJSONArray("achievements")
-                    val exposure_high = json.getString("exposure_high")
-                    val exposure_low = json.getString("exposure_low")
+                    val exposure_high = json.getString("exposure_high").toDouble().roundToInt()
+                    val exposure_low = json.getString("exposure_low").toDouble().roundToInt()
 
                     val achievements = mutableListOf<Achievement>()
                     for (i in 0 until achievementsJson.length()) {
@@ -152,7 +153,7 @@ class UserProfileScreen : Fragment() {
                     view.findViewById<TextView>(R.id.textExpositionLow).text = "You have been exposed to low noise for " + userAchievements.exposure_low + " seconds"
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Errore nella richiesta OkHttp", e)
+                Log.e(TAG, "Error on request OkHttp", e)
             }
         }
     }

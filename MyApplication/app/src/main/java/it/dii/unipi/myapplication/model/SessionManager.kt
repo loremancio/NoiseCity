@@ -4,6 +4,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 
+/**
+ * SessionManager is responsible for managing user session data.
+ * The data saved are the cookie and the username.
+ */
 class SessionManager(context: Context) {
     private val preferences: SharedPreferences =
         context.getSharedPreferences("user_session", Context.MODE_PRIVATE)

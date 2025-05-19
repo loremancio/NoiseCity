@@ -11,6 +11,9 @@ import it.dii.unipi.myapplication.R
 import it.dii.unipi.myapplication.model.AudioSample
 import android.graphics.Color
 
+/**
+ * Custom view for displaying audio waveforms.
+ */
 class WaveformView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -25,6 +28,7 @@ class WaveformView @JvmOverloads constructor(
     private var currentDataType: DataType = DataType.TIME_DOMAIN
     private var audioSample: AudioSample? = null
 
+    // Some style settings
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         strokeWidth = 2f
         color = ContextCompat.getColor(context, R.color.primary_blue)
@@ -96,7 +100,7 @@ class WaveformView @JvmOverloads constructor(
     }
 
     /**
-     * Imposta il valore massimo della magnitudo per la scala Y in dominio frequenza.
+     * Sets the maximum magnitude for the Y-axis in the frequency domain.
      */
     fun setMaxMagnitude(max: Float?) {
         this.maxMagnitude = max
@@ -104,25 +108,34 @@ class WaveformView @JvmOverloads constructor(
     }
 
     /**
-     * Imposta i limiti fissi per la scala Y.
+     * Sets the fixed Y-axis limits for the waveform view.
      */
     fun setFixedYLimits(min: Float, max: Float) {
         fixedMin = min
         fixedMax = max
         invalidate()
     }
+
+    /**
+     * Clears the fixed Y-axis limits, allowing for dynamic scaling.
+     */
     fun clearFixedYLimits() {
         fixedMin = null
         fixedMax = null
         invalidate()
     }
 
-    /** Imposta la frequenza massima visualizzata (Hz) per il dominio frequenza */
+    /**
+     * Sets the maximum frequency.
+     */
     fun setMaxDisplayFrequency(freqHz: Float) {
         maxDisplayFrequency = freqHz
         invalidate()
     }
 
+    /**
+     * Draw the chart on the screen.
+     */
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -145,7 +158,7 @@ class WaveformView @JvmOverloads constructor(
         // Draw the Y-axis title first
         canvas.save()
         canvas.rotate(-90f, yAxisTitleX, yAxisTitleY)
-        val yLabelText = if (currentDataType == DataType.FREQUENCY_DOMAIN) "Magnitudo" else "Ampiezza"
+        val yLabelText = if (currentDataType == DataType.FREQUENCY_DOMAIN) "Magnitude" else "Amplitude"
         val yTitleWidth = titlePaint.measureText(yLabelText)
         canvas.drawText(yLabelText, yAxisTitleX - yTitleWidth / 2, yAxisTitleY, titlePaint)
         canvas.restore()
@@ -155,7 +168,10 @@ class WaveformView @JvmOverloads constructor(
 
         drawWaveform(canvas, leftMargin, topMargin, drawingWidth, drawingHeight)
     }
-    
+
+    /**
+     * Draw the axes of the chart.
+     */
     private fun drawGridAndAxes(
         canvas: Canvas,
         left: Float,
@@ -231,6 +247,9 @@ class WaveformView @JvmOverloads constructor(
         canvas.drawLine(left, top, left, top + height, axisPaint)                   // Y‐axis
     }
 
+    /**
+     * Draw the actual waveform.
+     */
     private fun drawWaveform(
         canvas: Canvas,
         left: Float,

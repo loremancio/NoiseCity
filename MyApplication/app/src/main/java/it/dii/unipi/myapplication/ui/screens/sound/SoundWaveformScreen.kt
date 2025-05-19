@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
@@ -17,7 +16,6 @@ import it.dii.unipi.myapplication.controller.SoundController
 import it.dii.unipi.myapplication.database.CompensationDatabaseHelper
 import it.dii.unipi.myapplication.model.AudioSample
 import it.dii.unipi.myapplication.ui.components.WaveformView
-import kotlin.math.sqrt
 
 /**
  * Fragment that represents the sound waveform visualization screen
@@ -33,17 +31,17 @@ class SoundWaveformScreen : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        // now context is non-null
+        // now context is non-null so we can initialize the db
         dbHelper = CompensationDatabaseHelper(context)
     }
 
+    // We have two waveforms: one in the time domain and the other in the frequency domain
     private lateinit var waveformView: WaveformView
-    private lateinit var frequencyWaveformView: WaveformView // Added for frequency domain
+    private lateinit var frequencyWaveformView: WaveformView
     private lateinit var btnStart: Button
     private lateinit var btnStop: Button
     
     private lateinit var soundController: SoundController
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,7 +55,7 @@ class SoundWaveformScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "onViewCreated: Setting up UI components")
-        // delete only debug
+
         val compensationFactor = dbHelper.getCompensationValue()
         if (compensationFactor == null) {
             showCompensationDialog()
@@ -115,17 +113,17 @@ class SoundWaveformScreen : Fragment() {
     private fun showCompensationDialog() {
             // 1. Inflate
             val dialogView = layoutInflater.inflate(R.layout.dialog_compensation, null)
-            val editText = dialogView.findViewById<EditText>(R.id.etCompensation)
-            val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
-            val btnOk    = dialogView.findViewById<MaterialButton>(R.id.btnOkCustom)
+            val editText   = dialogView.findViewById<EditText>(R.id.etCompensation)
+            val btnCancel  = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+            val btnOk      = dialogView.findViewById<MaterialButton>(R.id.btnOkCustom)
 
-            // 2. Build the AlertDialog senza setPositive/Negative predefiniti
+            // 2. Build the AlertDialog
             val dialog = AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .setCancelable(false)
                 .create()
         
-            // 3. Wiring dei listener
+            // 3. Wiring of the listener
             btnCancel.setOnClickListener {
                 Log.d(TAG, "Compensation dialog cancelled")
                 dialog.dismiss()
@@ -139,13 +137,11 @@ class SoundWaveformScreen : Fragment() {
                     Log.d(TAG, "Compensation value set to: $value")
                     dialog.dismiss()
                 } catch (e: NumberFormatException) {
-                    editText.error = "Valore non valido"
+                    editText.error = "Value not valid"
                 }
             }
         
-            // 4. Mostra
+            // 4. Show
             dialog.show()
         }
-        
-  
 }
