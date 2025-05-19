@@ -26,7 +26,7 @@ class User(UserMixin):
     @staticmethod
     def create_user(username, password):
         if mongo.db.users.find_one({'username': username}):
-            return None  # Username già esistente
+            return None  # Username already exists
         pw_hash = bcrypt.generate_password_hash(password).decode('utf-8')
         user_id = mongo.db.users.insert_one({'username': username, 'password': pw_hash}).inserted_id
         return User({'_id': user_id, 'username': username, 'password': pw_hash})
