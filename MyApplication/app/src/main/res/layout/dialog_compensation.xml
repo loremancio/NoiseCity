@@ -10,7 +10,7 @@
         android:id="@+id/tvMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Inserisci il valore di compensazione (dB)"
+        android:text="Insert the Compensation Factor (dB)"
         android:textSize="16sp"
         android:layout_marginBottom="12dp"/>
 
@@ -33,7 +33,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="ANNULLA"
+            android:text="CANCEL"
             android:textColor="#FFFFFF"/>
 
         <Space

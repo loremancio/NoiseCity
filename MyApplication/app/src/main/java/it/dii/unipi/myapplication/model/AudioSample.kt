@@ -53,8 +53,6 @@ data class AudioSample(
         return samples.map { it / max }.toFloatArray()
     }
 
-
-
     /**
      * Computes the average decibel value (dBFS) for the sample, including compensation from DB.
      * @param context Context for accessing the compensation database

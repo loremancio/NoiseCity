@@ -40,6 +40,10 @@ import android.util.Log
 import it.dii.unipi.myapplication.controller.LoginActivity
 import java.lang.Double
 
+/**
+ * This fragment displays a map and allows the user to select a date and time range
+ * of the sound data to be displayed on the map.
+ */
 class MapScreen : Fragment() {
 
     companion object {
@@ -66,9 +70,9 @@ class MapScreen : Fragment() {
     private var deviceLocationCallback: LocationCallback? = null
     private var lastDeviceLocation: Location? = null
 
-    // Per il panning manuale
+    // to handle camera panning/zoom
     private var lastCenterLocation: Location? = null
-    private var currentRadiusMeters: Float = 1000f  // raggio corrente, inizialmente 1km
+    private var currentRadiusMeters: Float = 1000f  // the initial radius is 1km
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -91,7 +95,7 @@ class MapScreen : Fragment() {
             interval = 10_000
             fastestInterval = 5_000
             priority = Priority.PRIORITY_HIGH_ACCURACY
-            smallestDisplacement = 0f // gestito manualmente
+            smallestDisplacement = 0f
         }
 
         mapView.onCreate(savedInstanceState)
@@ -99,7 +103,7 @@ class MapScreen : Fragment() {
             googleMap = map
             ensureLocationPermission()
 
-            // Listener panning/zoom
+            // listener for camera zoom/panning
             map.setOnCameraIdleListener {
                 handleCameraIdle()
             }
@@ -110,9 +114,10 @@ class MapScreen : Fragment() {
             openDateTimePicker { millis ->
                 startTimeMillis = millis
                 etStart.setText(DateFormat.getDateTimeInstance().format(Date(millis)))
-                lastCenterLocation = null // reset
+                lastCenterLocation = null
             }
         }
+
         etEnd.setOnClickListener {
             openDateTimePicker { millis ->
                 endTimeMillis = millis
@@ -121,7 +126,7 @@ class MapScreen : Fragment() {
             }
         }
 
-        // Applica filtri
+        // Apply filters
         btnApply.setOnClickListener {
             if (startTimeMillis == null || endTimeMillis == null) {
                 Toast.makeText(requireContext(), "Please, fill all the fields", Toast.LENGTH_SHORT).show()
@@ -130,7 +135,8 @@ class MapScreen : Fragment() {
             filterForm.visibility = View.GONE
             btnEditFilters.visibility = View.VISIBLE
             btnCenterLocation.visibility = View.VISIBLE
-            // Centrati sulla location utente
+
+            // center on the user position
             lastDeviceLocation?.let {
                 googleMap?.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
@@ -138,7 +144,7 @@ class MapScreen : Fragment() {
                     )
                 )
             }
-            // Forza fetch iniziale con 1km
+            // the initial fetch is done on the user position with a radius of 1km
             googleMap?.let { map ->
                 currentRadiusMeters = 1000f
                 val center = map.cameraPosition.target
@@ -151,14 +157,14 @@ class MapScreen : Fragment() {
             }
         }
 
-        // Modifica filtri
+        // To modify filters
         btnEditFilters.setOnClickListener {
             filterForm.visibility = View.VISIBLE
             btnEditFilters.visibility = View.GONE
             btnCenterLocation.visibility = View.GONE
         }
 
-        // Ricentra su posizione utente
+        // Centers the user position
         btnCenterLocation.setOnClickListener {
             lastDeviceLocation?.let {
                 googleMap?.animateCamera(
@@ -168,7 +174,6 @@ class MapScreen : Fragment() {
                 )
             }
         }
-
         return view
     }
 

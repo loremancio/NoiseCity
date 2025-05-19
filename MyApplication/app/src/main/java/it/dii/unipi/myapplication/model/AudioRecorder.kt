@@ -2,7 +2,6 @@ package it.dii.unipi.myapplication.model
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.location.Location
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
@@ -10,32 +9,20 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import kotlin.math.log10
-import kotlin.math.sqrt
 
 /**
  * Handles audio recording and periodic sending of noise measurements.
  */
 class AudioRecorder (
     private val context: Context,
-
 ){
     companion object {
         private const val TAG = "AudioRecorder"
         private const val SAMPLE_RATE = 44_100
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO
         private const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
-
     }
 
     private val audioSender = DataSender(context)
@@ -53,7 +40,7 @@ class AudioRecorder (
         sampleCallback = callback
     }
 
-    @SuppressLint("MissingPermission") // Permission should be checked by caller
+    @SuppressLint("MissingPermission")
     fun startRecording(): Boolean {
         if (audioRecord != null) {
             Log.d(TAG, "Recording already started")
@@ -108,9 +95,6 @@ class AudioRecorder (
         }
     }
 
-
-
-
     fun stopRecording() {
         recordingJob?.cancel()
         audioRecord?.apply {
@@ -119,7 +103,6 @@ class AudioRecorder (
         }
         audioRecord = null
     }
-
    
     fun isRecording(): Boolean =
         audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING

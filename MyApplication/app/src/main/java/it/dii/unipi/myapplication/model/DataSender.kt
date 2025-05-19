@@ -1,20 +1,12 @@
 package it.dii.unipi.myapplication.model
 
 import android.content.Context
-import android.location.Location
-import android.media.AudioFormat
-import android.media.AudioRecord
-import android.media.MediaRecorder
 import kotlinx.coroutines.withContext
 import android.util.Log
 import android.widget.Toast
 import it.dii.unipi.myapplication.app.Config
-import it.dii.unipi.myapplication.database.CompensationDatabaseHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -25,8 +17,6 @@ import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.log10
-import kotlin.math.sqrt
 
 class DataSender(
   private val context: Context,
@@ -35,16 +25,12 @@ class DataSender(
     private const val TAG = "DataSender"
     private const val SAMPLE_RATE = 44_100
     private const val JSON_TYPE = "application/json; charset=utf-8"
-    private const val MIN_RMS = 1e-8
   }
 
   private val client = OkHttpClient()
   private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
   private val username = SessionManager(context).getUsernameFromSession()
   private val cookie = SessionManager(context).getCookieFromSession()
-
-  private var sumSquares = 0.0
-  private var sampleCount = 0
 
     fun sendToServer(sample: AudioSample) {
       val noiseLevel = sample.averageDbWithCompensation(context)
@@ -77,9 +63,9 @@ class DataSender(
             .addHeader("Cookie", cookie)
             .build()
           client.newCall(request).execute().use { resp ->
-            val responseBodyString = resp.body?.string() ?: throw Exception("Corpo vuoto") // Read body once
+            val responseBodyString = resp.body?.string() ?: throw Exception("Empty Body") // Read body once
             if (resp.isSuccessful) {
-              Log.d(TAG, "sendToServer: Data sent successfully: $responseBodyString") // More detailed success log
+              Log.d(TAG, "sendToServer: Data sent successfully: $responseBodyString")
               val jsonResponse = JSONObject(responseBodyString)
               val achievements = jsonResponse.getJSONArray("achievements")
 
@@ -93,10 +79,10 @@ class DataSender(
                  }
                }
               } else {
-                Log.d(TAG, "No achievements reached") // More detailed log
+                Log.d(TAG, "No achievements reached")
               }
             } else {
-              Log.e(TAG, "Error sending data: Code ${resp.code}, Message: ${resp.message}, Response: $responseBodyString") // More detailed error
+              Log.e(TAG, "Error sending data: Code ${resp.code}, Message: ${resp.message}, Response: $responseBodyString")
             }
           }
         } catch (e: Exception) {

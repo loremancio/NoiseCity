@@ -14,6 +14,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
+/**
+ * Activity that handles user registration
+ */
 class RegistrationActivity : AppCompatActivity() {
 
     companion object {
@@ -71,7 +74,6 @@ class RegistrationActivity : AppCompatActivity() {
                             .setTitle("Login Success!")
                             .setMessage(result.message)
                             .show()
-                        // the finish command goes back to the previous activity
                         finish()
                     }
                     is RegistrationResult.Error -> {

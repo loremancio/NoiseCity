@@ -8,11 +8,9 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import it.dii.unipi.myapplication.model.AudioRecorder
 import it.dii.unipi.myapplication.model.AudioSample
-import it.dii.unipi.myapplication.utils.PermissionUtils
 
 /**
  * Controller class that manages the audio recording functionality
- * and coordinates between the model and view
  */
 class SoundController(private val context: Context) {
 
