@@ -1,0 +1,58 @@
+Lorenzo Mancinelli
+
+05/05/2025:
+- Prima chiamata di gruppo [vedi LOG_GROUP.txt]
+- Creazione della repository GitHub
+- Acquisizione informazioni su Gradle; creazione della struttura dell'applicazione
+
+08/05/2025:
+- Seconda chiamata di gruppo [vedi LOG_GROUP.txt]
+- Inizio implementazione dell'invio dei dati al server (informazioni sull'audio campionato, posizione corrente, username corrente)
+
+10/05/2025:
+- Terza chiamata di gruppo [vedi LOG_GROUP.txt]
+- Fine implementazione dell'invio dei dati al server, refattorizzati e sistemati poi da Boni
+- Merge del codice con gli altri membri
+
+11/05/2025:
+- Incontro con Loni per definire lo scheletro e le funzionalità della pagina utente, nella quale sono riassunti gli achievement e le statistiche personali
+- Creazione della struttura frontend della pagina utente
+
+12/05/2025:
+- Implementazione della ricezione e della visualizzazione degli achievement sbloccati dall'utente
+- Merge del codice con gli altri membri
+
+13/05/2025:
+- Implementazione dei popup per il raggiungimento di un nuovo achievement
+- Migliorata la grafica della pagina utente
+- Quarta chiamata di gruppo [vedi LOG_GROUP.txt]
+- Merge del codice con gli altri membri
+
+14/05/2025:
+- Stesura dell'abstract della documentazione
+
+15/05/2025:
+- Esecuzione test sul campo
+- Implementazione visualizzazione statistiche sull'esposizione dell'utente al rumore (backend e frontend)
+- Migliorata la rilevazione della posizione
+
+16/05/2025:
+- Merge del codice con gli altri membri
+- Inizio stesura documentazione (architecture: achievements and statistics)
+- Test dell'applicazione
+
+17/05/2025:
+- Stesura documentazione (introduction: related works)
+- Inizio stesura documentazione (experimental results: energy consumption)
+- Test dell'applicazione
+
+18/05/2025:
+- Inizio stesura documentazione (conclusion)
+- Test dell'applicazione
+- Quinta chiamata di gruppo [vedi LOG_GROUP.txt]
+
+19/05/2025:
+- Effetuati test per completare capitolo "experimental results: energy consumption" della documentazione
+- Incontro con il gruppo per mostrare le funzionalità dell'applicazione in ambiente reale
+- Pulizia codice per visualizzazione statistiche e achievements
+
